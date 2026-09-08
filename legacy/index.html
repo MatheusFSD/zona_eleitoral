@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#193c34">
+  <title>Seção 127 — MVP</title>
+  <style>
+    :root{--ink:#1d231f;--paper:#f2ead5;--paper2:#ded1ae;--green:#193c34;--screen:#102823;--glow:#bde3b5;--yellow:#e4b94c;--red:#963f37;--desk:#654531;--blue:#315b6b;--shadow:rgba(7,13,11,.35)}
+    *{box-sizing:border-box}html{background:#14221e}body{margin:0;min-height:100vh;color:var(--ink);font-family:"Trebuchet MS",Arial,sans-serif;background:radial-gradient(circle at 20% 8%,#304a42,#162722 62%,#101b18)}
+    button{font:inherit}button:focus-visible,summary:focus-visible{outline:3px solid #f4d76c;outline-offset:3px}
+    .app{width:min(1420px,100%);min-height:100vh;margin:auto;padding:14px;display:flex;flex-direction:column;gap:11px}
+    .top{padding:10px 14px;display:grid;grid-template-columns:minmax(190px,1.25fr) repeat(4,minmax(82px,.55fr));align-items:center;gap:10px;color:#f5efdf;background:var(--green);border:2px solid rgba(255,255,255,.14);border-radius:4px;box-shadow:0 6px 20px var(--shadow)}
+    .brand{display:flex;gap:11px;align-items:center}.shield{width:43px;height:48px;display:grid;place-items:center;flex:none;color:var(--green);font:bold 16px Georgia;background:var(--yellow);clip-path:polygon(50% 0,94% 18%,84% 78%,50% 100%,16% 78%,6% 18%)}h1{margin:0;font:800 19px/1 Georgia;letter-spacing:.08em}.brand p{margin:5px 0 0;color:#c2d4cd;font:10px/1.2 "Courier New";text-transform:uppercase}
+    .metric{padding-left:11px;border-left:1px solid rgba(255,255,255,.2)}.label{display:block;margin-bottom:4px;color:#b8cdc5;font:10px/1 "Courier New";letter-spacing:.1em;text-transform:uppercase}.value{font:800 19px/1 "Courier New"}.value.bad{color:#ffb8aa}.meter{height:5px;margin-top:6px;background:rgba(0,0,0,.3)}.fill{width:10%;height:100%;background:var(--yellow);transition:.3s}
+    .layout{flex:1;display:grid;grid-template-columns:minmax(210px,.78fr) minmax(510px,2fr) minmax(225px,.82fr);gap:11px}.panel{min-width:0;border:2px solid rgba(255,255,255,.12);border-radius:4px;box-shadow:0 6px 18px var(--shadow)}
+    .person{padding:16px;color:#f4efe2;background:linear-gradient(rgba(16,35,30,.78),rgba(16,35,30,.9)),repeating-linear-gradient(90deg,transparent 0 31px,rgba(255,255,255,.04) 32px);display:flex;flex-direction:column;justify-content:space-between}.sign{width:max-content;padding:5px 7px;color:#c9d8d3;border:1px solid rgba(255,255,255,.24);font:9px "Courier New";text-transform:uppercase}
+    .portrait{--skin:#986147;--shirt:#b36d38;--hair:#30221d;position:relative;width:150px;height:190px;margin:10px auto;filter:drop-shadow(0 12px 7px rgba(0,0,0,.25))}.body{position:absolute;left:17px;bottom:-38px;width:116px;height:120px;background:var(--shirt);border:4px solid #1c2421;border-radius:52% 52% 10% 10%}.neck{position:absolute;left:59px;top:96px;width:34px;height:45px;background:var(--skin);border:4px solid #1c2421}.head{position:absolute;left:38px;top:21px;width:76px;height:96px;background:var(--skin);border:4px solid #1c2421;border-radius:45%}.hair{position:absolute;left:35px;top:10px;width:82px;height:53px;background:var(--hair);border:4px solid #1c2421;border-radius:52% 48% 30% 25%;clip-path:polygon(0 0,100% 0,100% 78%,82% 64%,71% 86%,58% 66%,43% 82%,27% 62%,0 78%)}.eye{position:absolute;top:66px;width:8px;height:5px;background:#171815;border-radius:50%}.eye.l{left:56px}.eye.r{right:54px}.nose{position:absolute;left:72px;top:70px;width:10px;height:17px;border-left:3px solid rgba(55,34,27,.5);border-bottom:3px solid rgba(55,34,27,.5)}.mouth{position:absolute;left:64px;top:96px;width:25px;height:8px;border-bottom:3px solid rgba(55,24,25,.75);border-radius:50%}
+    .person h2{margin:0;text-align:center;font:700 18px Georgia}.sub{margin:5px 0 0;color:#b8ccc5;text-align:center;font:10px/1.3 "Courier New";text-transform:uppercase}.speech{position:relative;min-height:94px;margin-top:15px;padding:13px;color:#282c28;background:var(--paper);border-radius:3px;box-shadow:3px 4px rgba(0,0,0,.22);font:15px/1.45 Georgia}.speech:before{content:"";position:absolute;left:28px;top:-14px;border:7px solid transparent;border-bottom-color:var(--paper)}
+    .desk{padding:13px;background:linear-gradient(rgba(0,0,0,.07),rgba(0,0,0,.07)),repeating-linear-gradient(6deg,transparent 0 32px,rgba(53,24,12,.12) 33px 35px),var(--desk);display:flex;flex-direction:column;gap:11px}.desk-top{display:grid;grid-template-columns:minmax(235px,1fr) minmax(225px,.92fr);gap:11px}
+    .paper{position:relative;min-height:270px;padding:15px;background:var(--paper);border:1px solid #c4b68d;box-shadow:4px 6px rgba(42,23,14,.27)}.paper:after{content:"";position:absolute;inset:7px;border:1px solid rgba(87,72,44,.24);pointer-events:none}.doc-head{position:relative;z-index:1;padding-bottom:9px;border-bottom:2px solid #8d805e;display:flex;justify-content:space-between}.kicker{color:#676150;font:9px "Courier New";letter-spacing:.11em;text-transform:uppercase}.doc-title{margin-top:3px;font:800 16px Georgia}.br{color:var(--green);font:900 21px Georgia}.doc-body{position:relative;z-index:1;padding-top:14px;display:grid;grid-template-columns:75px 1fr;gap:13px}.photo{height:96px;display:grid;place-items:center;color:#716a59;background:#d4caad;border:1px solid #8e856d;font:10px "Courier New";text-align:center}.field{margin-bottom:9px}.field small{display:block;color:#746d5b;font:9px "Courier New";text-transform:uppercase}.field strong{display:block;margin-top:2px;font:700 12px/1.25 "Courier New";overflow-wrap:anywhere}.doc-foot{position:absolute;z-index:1;left:15px;right:15px;bottom:15px;display:flex;justify-content:space-between;color:#746d5b;font:9px "Courier New";text-transform:uppercase}
+    .terminal{min-height:270px;padding:12px;color:var(--glow);background:#29322f;border:5px solid #3b4541;box-shadow:4px 6px rgba(42,23,14,.27),inset 0 0 0 2px #151b19}.screen{min-height:184px;padding:11px;background:repeating-linear-gradient(0deg,transparent 0 3px,rgba(255,255,255,.025) 4px),var(--screen);border:2px solid #091713;font:11px/1.4 "Courier New";text-shadow:0 0 5px rgba(126,231,161,.2)}.term-head{padding-bottom:7px;border-bottom:1px dashed rgba(185,231,191,.4);display:flex;justify-content:space-between}.row{display:grid;grid-template-columns:73px 1fr;gap:5px;margin-top:6px}.row span:first-child{opacity:.67}.rv{overflow-wrap:anywhere}.ok{color:#d4f7bd}.warn{color:#ffd17b}.bio-wrap{padding-top:10px;display:flex;align-items:center;gap:8px}.bio{min-height:42px;padding:8px 10px;color:#11251f;background:#abd4ae;border:0;border-bottom:4px solid #658d6f;border-radius:3px;cursor:pointer;font:800 10px "Courier New";text-transform:uppercase}.bio:disabled{opacity:.45;cursor:not-allowed}.bio-result{font:10px/1.3 "Courier New"}
+    .book{min-height:174px;padding:13px 15px;background:linear-gradient(90deg,transparent 49%,rgba(77,62,37,.16) 50%,transparent 51%),repeating-linear-gradient(0deg,transparent 0 29px,rgba(61,85,115,.16) 30px 31px),#eee4ca;border:1px solid #c6b98f;box-shadow:4px 6px rgba(42,23,14,.27)}.book-head{padding-bottom:7px;border-bottom:1px solid #9e9274;display:flex;justify-content:space-between}.book-head strong{font:800 14px Georgia}.book-head span{color:#746d5b;font:9px "Courier New"}.book table{width:100%;margin-top:7px;border-collapse:collapse;table-layout:fixed;font:10px/1.25 "Courier New"}.book th{color:#756d5b;font-size:8px;text-align:left;text-transform:uppercase}.book th:nth-child(1),.book td:nth-child(1){width:13%}.book th:nth-child(3),.book td:nth-child(3){width:20%}.book th:nth-child(4),.book td:nth-child(4){width:22%}.book td{padding:7px 3px 7px 0;border-bottom:1px solid rgba(92,79,50,.17);overflow-wrap:anywhere}.current{font-weight:800;background:rgba(230,187,75,.16)}
+    .actions{margin-top:auto;padding:11px;display:grid;grid-template-columns:repeat(3,1fr);gap:8px;background:rgba(41,24,14,.32);border:1px solid rgba(255,255,255,.12)}.decision{min-height:58px;padding:8px 6px;color:#f7f0dd;border:0;border-radius:3px;cursor:pointer;font:800 11px/1.25 "Courier New";text-transform:uppercase;box-shadow:inset 0 -4px rgba(0,0,0,.22);transition:.12s}.decision:hover:not(:disabled){filter:brightness(1.1);transform:translateY(-1px)}.decision:disabled{opacity:.42;cursor:not-allowed}.allow{background:#22604c}.procedure{background:#967025}.redirect{background:#843d37}
+    .manual{overflow:hidden;background:var(--paper);display:flex;flex-direction:column}.manual-head{padding:14px;color:#f3ead7;background:var(--blue);border-bottom:5px solid #244754}.manual-head small{display:block;margin-bottom:4px;color:#bed0d7;font:9px "Courier New";letter-spacing:.1em;text-transform:uppercase}.manual-head strong{font:800 18px Georgia}.manual-body{padding:11px 13px;overflow:auto}details{margin-bottom:7px;background:rgba(255,255,255,.24);border-bottom:1px solid #c7b994}summary{min-height:40px;padding:9px 3px;cursor:pointer;font:800 10px/1.3 "Courier New";text-transform:uppercase}details ul{margin:0;padding:0 4px 11px 21px;color:#464b45;font:12px/1.4 Georgia}.notice{margin:auto 13px 13px;padding:9px;color:#5f4e2e;background:rgba(230,187,75,.18);border-left:4px solid #a98224;font:9px/1.4 "Courier New"}
+    .overlay{position:fixed;z-index:20;inset:0;padding:17px;display:grid;place-items:center;color:#f4efdf;background:rgba(8,17,14,.88);backdrop-filter:blur(4px)}.overlay[hidden]{display:none}.modal{width:min(640px,100%);max-height:calc(100vh - 34px);overflow:auto;padding:25px;background:#1a3b33;border:2px solid rgba(255,255,255,.18);border-radius:4px;box-shadow:0 18px 60px rgba(0,0,0,.5)}.modal-kicker{color:#dfbe5a;font:10px "Courier New";text-transform:uppercase;letter-spacing:.13em}.modal h2{margin:8px 0 12px;font:800 35px/1 Georgia}.modal p{color:#d2ddd8;font:15px/1.55 Georgia}.intro{padding:9px 0 9px 14px;border-left:4px solid var(--yellow);color:#fff8e6!important}.stats{margin:17px 0;display:grid;grid-template-columns:repeat(3,1fr);gap:7px}.stat{padding:10px;background:rgba(255,255,255,.07)}.stat span{display:block;color:#aec3bb;font:8px "Courier New";text-transform:uppercase}.stat strong{display:block;margin-top:5px;font:800 19px "Courier New"}.primary{min-height:48px;padding:10px 17px;color:#143129;background:var(--yellow);border:0;border-bottom:4px solid #9d7921;border-radius:3px;cursor:pointer;font:800 12px "Courier New";text-transform:uppercase}.primary:hover{filter:brightness(1.08)}
+    .feedback{width:min(505px,100%);padding:23px;color:var(--ink);background:var(--paper);border:2px solid #b8a77f;box-shadow:10px 12px rgba(0,0,0,.25);transform:rotate(-.4deg)}.stamp{display:inline-block;margin-bottom:10px;padding:6px 9px;color:var(--red);border:3px solid var(--red);font:900 15px "Courier New";text-transform:uppercase;transform:rotate(-3deg)}.feedback h2{margin:0 0 7px;font:800 23px Georgia}.feedback p{color:#414640;font:14px/1.5 Georgia}.feedback-meta{margin:12px 0;padding:8px 0;border-block:1px solid #b9ac8b;font:10px/1.4 "Courier New"}.toast{position:fixed;z-index:15;left:50%;bottom:20px;width:min(430px,calc(100% - 30px));padding:10px 13px;color:#f9f2df;background:#192d28;border-left:5px solid var(--yellow);box-shadow:0 7px 24px rgba(0,0,0,.4);transform:translate(-50%,140%);transition:.25s;font:11px/1.4 "Courier New"}.toast.show{transform:translate(-50%,0)}.sr{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+    @media(max-width:1040px){.layout{grid-template-columns:225px minmax(470px,1fr)}.manual{grid-column:1/-1}.manual-body{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;overflow:visible}.manual-body details{margin:0}.notice{margin-top:4px}}
+    @media(max-width:760px){.app{padding:7px}.top{grid-template-columns:1.4fr repeat(2,.65fr)}.top .metric:nth-last-child(-n+2){display:none}.layout{display:flex;flex-direction:column}.person{min-height:410px}.desk-top{grid-template-columns:1fr}.actions{grid-template-columns:1fr}.decision{min-height:49px}.manual-body{grid-template-columns:1fr 1fr}}
+    @media(max-width:430px){.top{grid-template-columns:1fr 1fr}.brand{grid-column:1/-1}.top .metric{padding:0;border:0}.doc-body{grid-template-columns:62px 1fr;gap:9px}.book{overflow-x:auto}.book table{min-width:410px}.manual-body,.stats{grid-template-columns:1fr}.modal{padding:19px}.modal h2{font-size:30px}}
+    @media(prefers-reduced-motion:reduce){*{transition:none!important}}
+  </style>
+</head>
+<body>
+  <main class="app">
+    <header class="top">
+      <div class="brand"><div class="shield">127</div><div><h1>SEÇÃO 127</h1><p>Escola Municipal Horizonte</p></div></div>
+      <div class="metric"><span class="label">Horário</span><strong class="value" id="time">07:55</strong></div>
+      <div class="metric"><span class="label">Fila</span><strong class="value" id="queue">04</strong><div class="meter"><div class="fill" id="queueFill"></div></div></div>
+      <div class="metric"><span class="label">Atendidos</span><strong class="value" id="served">000</strong></div>
+      <div class="metric"><span class="label">Ocorrências</span><strong class="value" id="errors">00</strong></div>
+    </header>
+    <section class="layout" aria-label="Mesa da seção eleitoral">
+      <aside class="panel person">
+        <div><div class="sign">Sala 03 · mesa receptora</div><div class="portrait" id="portrait" aria-hidden="true"><div class="body"></div><div class="neck"></div><div class="head"></div><div class="hair"></div><div class="eye l"></div><div class="eye r"></div><div class="nose"></div><div class="mouth"></div></div><h2 id="personName">Portas fechadas</h2><p class="sub" id="personSub">Votação começa às 08:00</p></div>
+        <div class="speech" id="speech">Organize a mesa e prepare-se para a primeira pessoa.</div>
+      </aside>
+      <section class="panel desk">
+        <div class="desk-top">
+          <article class="paper" aria-label="Documento apresentado">
+            <div class="doc-head"><div><div class="kicker">Documento apresentado</div><div class="doc-title" id="docType">—</div></div><div class="br">BR</div></div>
+            <div class="doc-body"><div class="photo" id="docPhoto">SEM<br>DOCUMENTO</div><div>
+              <div class="field"><small>Nome</small><strong id="docName">—</strong></div>
+              <div class="field"><small>Nascimento</small><strong id="docBirth">—</strong></div>
+              <div class="field"><small>Nº do documento</small><strong id="docNumber">—</strong></div>
+              <div class="field"><small>Observação</small><strong id="docNote">—</strong></div>
+            </div></div><div class="doc-foot"><span>Identificação</span><span id="docCode">000000</span></div>
+          </article>
+          <section class="terminal" aria-label="Terminal da seção">
+            <div class="screen"><div class="term-head"><strong>TERMINAL · 127</strong><span id="termTime">07:55</span></div>
+              <div class="row"><span>ELEITOR</span><strong class="rv" id="regName">AGUARDANDO</strong></div>
+              <div class="row"><span>NASC.</span><span class="rv" id="regBirth">--/--/----</span></div>
+              <div class="row"><span>SEÇÃO</span><span class="rv" id="regSection">---</span></div>
+              <div class="row"><span>SITUAÇÃO</span><strong class="rv warn" id="regStatus">FECHADO</strong></div>
+              <div class="row"><span>BIOMETRIA</span><strong class="rv" id="bioStatus">NÃO INICIADA</strong></div>
+            </div>
+            <div class="bio-wrap"><button class="bio" id="bioButton" disabled>Testar biometria</button><span class="bio-result" id="bioResult">Terminal bloqueado</span></div>
+          </section>
+        </div>
+        <section class="book"><div class="book-head"><strong>Caderno de votação</strong><span>FOLHA 08 / SEÇÃO 127</span></div>
+          <table><thead><tr><th>Nº</th><th>Nome</th><th>Nascimento</th><th>Anotação</th></tr></thead><tbody id="bookBody"><tr><td>—</td><td>AGUARDANDO ABERTURA</td><td>—</td><td>—</td></tr></tbody></table>
+        </section>
+        <div class="actions" aria-label="Decisão">
+          <button class="decision allow" data-action="allow" disabled>Habilitar votação<br><small>decisão rápida</small></button>
+          <button class="decision procedure" data-action="procedure" disabled>Aplicar procedimento<br><small>consome tempo</small></button>
+          <button class="decision redirect" data-action="redirect" disabled>Encaminhar orientação<br><small>não habilitar</small></button>
+        </div>
+      </section>
+      <aside class="panel manual">
+        <div class="manual-head"><small>Consulta permitida</small><strong>Manual da Seção</strong></div>
+        <div class="manual-body">
+          <details open><summary>1. Identificação</summary><ul><li>Confira nome, foto e data.</li><li>Documento deve ter foto.</li><li>Versão física ou digital oficial é aceita neste protótipo.</li></ul></details>
+          <details><summary>2. Seção e situação</summary><ul><li>Somente pessoas da seção 127.</li><li>“Já votou” ou “impedido”: não habilitar.</li><li>Encaminhe dúvidas de local ou cadastro.</li></ul></details>
+          <details><summary>3. Biometria</summary><ul><li>Faça uma tentativa antes de habilitar.</li><li>Se falhar, tente novamente.</li><li>Após duas falhas, aplique o procedimento manual.</li></ul></details>
+          <details><summary>4. Divergências</summary><ul><li>Dado divergente não deve ser ignorado.</li><li>Foto ou nome duvidoso: aplique procedimento.</li><li>Registre e peça apoio quando necessário.</li></ul></details>
+        </div>
+        <div class="notice">REGRAS SIMPLIFICADAS PARA TESTE DE GAMEPLAY. Não representa treinamento eleitoral oficial.</div>
+      </aside>
+    </section>
+  </main>
+  <div class="overlay" id="startOverlay"><section class="modal" role="dialog" aria-modal="true" aria-labelledby="startTitle">
+    <div class="modal-kicker">Protótipo · turno comprimido</div><h2 id="startTitle">Um dia na Seção 127</h2>
+    <p class="intro">Confira cada pessoa, siga o procedimento e mantenha a fila andando. Você nunca verá em quem alguém votou.</p>
+    <p>O relógio avança em saltos para condensar um dia inteiro em cerca de oito minutos. Os casos ficam mais ambíguos conforme a pressão aumenta.</p>
+    <div class="stats"><div class="stat"><span>Meta</span><strong>12 casos</strong></div><div class="stat"><span>Início</span><strong>08:00</strong></div><div class="stat"><span>Fim</span><strong>17:00</strong></div></div>
+    <button class="primary" id="startButton">Abrir a seção</button>
+  </section></div>
+  <div class="overlay" id="feedbackOverlay" hidden><section class="feedback" role="dialog" aria-modal="true" aria-labelledby="feedbackTitle">
+    <div class="stamp" id="feedbackStamp">PROCEDIMENTO</div><h2 id="feedbackTitle">Decisão registrada</h2><p id="feedbackText">—</p><div class="feedback-meta" id="feedbackMeta">—</div><button class="primary" id="nextButton">Próxima pessoa</button>
+  </section></div>
+  <div class="overlay" id="endOverlay" hidden><section class="modal" role="dialog" aria-modal="true" aria-labelledby="endTitle">
+    <div class="modal-kicker">Boletim de encerramento</div><h2 id="endTitle">A porta finalmente fechou.</h2><p class="intro" id="endingLine">O ventilador continua girando.</p>
+    <div class="stats"><div class="stat"><span>Atendidos</span><strong id="endServed">12</strong></div><div class="stat"><span>Corretos</span><strong id="endCorrect">0/12</strong></div><div class="stat"><span>Ocorrências</span><strong id="endErrors">0</strong></div></div>
+    <p id="endSummary">—</p><button class="primary" id="restartButton">Jogar novamente</button>
+  </section></div>
+  <div class="toast" id="toast" role="status" aria-live="polite">—</div><div class="sr" id="live" aria-live="polite"></div>
+  <script>
+    (function(){
+      "use strict";
+      var people=[
+        {t:"08:03",q:5,n:"Marina de Souza",s:"Primeira eleitora do dia",d:"Bom dia. É aqui mesmo, né? Prometo que vou ser rápida.",c:["#8b593f","#cc7c35","#33251f"],doc:["Carteira de identidade","Marina de Souza","14/08/1988","28.410.993-2","Documento com foto","MS-8814","FOTO COMPATÍVEL"],reg:["MARINA DE SOUZA","14/08/1988","127","REGULAR"],bio:["ok"],right:"allow",need:1,why:"Documento e cadastro coincidem; a biometria confirmou a identidade."},
+        {t:"08:34",q:7,n:"Carlos Eduardo Lima",s:"Diz votar nesta sala há anos",d:"Sempre votei nessa sala. Não tem como minha seção ser outra.",c:["#6f432f","#456879","#1f1b18"],doc:["Carteira de motorista","Carlos Eduardo Lima","03/11/1975","040993115-7","Documento com foto","CL-7503","FOTO COMPATÍVEL"],reg:["CARLOS EDUARDO LIMA","03/11/1975","128","LOCAL DIVERGENTE"],bio:["ok"],right:"redirect",need:0,why:"O cadastro indica a seção 128. A mesa 127 não deve habilitá-lo."},
+        {t:"09:12",q:10,n:"Neide Aparecida",s:"Biometria costuma falhar",d:"Minha digital nunca pega. Pode tentar, mas vai dar trabalho.",c:["#9a6347","#8f5263","#b7a89b"],doc:["Carteira de identidade","Neide Aparecida Ferreira","21/02/1964","10.882.449-1","Documento antigo com foto","NF-6421","FOTO ANTIGA"],reg:["NEIDE APARECIDA FERREIRA","21/02/1964","127","REGULAR"],bio:["fail","fail"],right:"procedure",need:2,why:"Após duas falhas biométricas, era necessário aplicar a verificação manual prevista."},
+        {t:"09:55",q:12,n:"Rafael Monteiro",s:"Chegou olhando o relógio",d:"Tem como agilizar? Eu deixei o carro num lugar meio complicado.",c:["#7d5037","#405a36","#291d17"],doc:["Carteira profissional","Rafael Monteiro Alves","07/07/1991","083.901.226-4","Documento com foto","RA-9107","FOTO COMPATÍVEL"],reg:["RAFAEL MONTEIRO ALVES","07/07/1991","127","JÁ VOTOU"],bio:["ok"],right:"redirect",need:0,why:"O terminal já registrava comparecimento. O caso precisava ser encaminhado, não habilitado novamente."},
+        {t:"10:31",q:16,n:"Ivone Martins",s:"Atendimento prioritário",d:"Essa foto é do tempo em que meu cabelo ainda obedecia.",c:["#6d4736","#6b4f81","#d7d0c4"],doc:["Carteira de identidade","Ivone Martins Prado","29/09/1948","05.220.871-0","Documento antigo com foto","IP-4829","FOTO ANTIGA"],reg:["IVONE MARTINS PRADO","29/09/1948","127","REGULAR · PRIORIDADE"],bio:["ok"],right:"allow",need:1,why:"Apesar da foto antiga, os dados e a biometria confirmaram a identidade."},
+        {t:"11:10",q:19,n:"Jéssica Nogueira",s:"Cadastro parece quase certo",d:"Trocaram o dia e o mês de novo? Isso vive acontecendo comigo.",c:["#9e6547","#b64e44","#2b211d"],doc:["Identidade digital oficial","Jéssica Nogueira Melo","04/12/1998","44.218.770-9","Aplicativo oficial","JM-9812","TELA OFICIAL"],reg:["JÉSSICA NOGUEIRA MELO","12/04/1998","127","DADO DIVERGENTE"],bio:["ok"],right:"procedure",need:1,why:"A data de nascimento divergia. A biometria ajudava, mas a diferença ainda precisava ser registrada e verificada."},
+        {t:"11:57",q:23,n:"Augusto Ribeiro",s:"Fala baixo e evita contato",d:"Só preciso votar e ir embora. Está tudo aí no sistema.",c:["#80503a","#806b39","#4b423a"],doc:["Carteira de identidade","Augusto Ribeiro","17/01/1980","21.209.330-5","Documento com foto","AR-8017","FOTO COMPATÍVEL"],reg:["AUGUSTO RIBEIRO","17/01/1980","127","CADASTRO IMPEDIDO"],bio:["ok"],right:"redirect",need:0,why:"A situação no terminal impedia a habilitação. Era necessário encaminhá-lo para orientação."},
+        {t:"12:41",q:26,n:"Luan dos Santos",s:"Primeira votação",d:"Eu trouxe o documento, mas ele não tem foto. Serve mesmo assim?",c:["#7a4a31","#4076a1","#1c1715"],doc:["Certidão de nascimento","Luan dos Santos Pereira","16/06/2008","104884 · Livro A","Documento sem foto","LP-0816","SEM FOTO"],reg:["LUAN DOS SANTOS PEREIRA","16/06/2008","127","REGULAR"],bio:["ok"],right:"redirect",need:0,why:"Neste protótipo, a identificação exige documento oficial com foto. Ele deveria buscar orientação."},
+        {t:"13:33",q:29,n:"Bianca Moreira",s:"Nome mudou recentemente",d:"Casei no ano passado. Um documento está com o nome novo e o cadastro não.",c:["#a1684b","#3f807a","#513429"],doc:["Carteira de motorista","Bianca Moreira Campos","25/05/1993","072119225-1","Nome atualizado","BC-9325","FOTO COMPATÍVEL"],reg:["BIANCA MOREIRA LOPES","25/05/1993","127","NOME DIVERGENTE"],bio:["ok"],right:"procedure",need:1,why:"A biometria coincidiu, mas a divergência de nome exigia conferência e registro antes de prosseguir."},
+        {t:"14:21",q:33,n:"Paulo César Dias",s:"Documento muito danificado",d:"Caiu água nele ontem. Mas dá para ver que sou eu... mais ou menos.",c:["#88573f","#7d563a","#302722"],doc:["Carteira de identidade","Paulo César Dias","30/10/1969","18.??? .442-?","Foto e número danificados","PD-6930","FOTO ILEGÍVEL"],reg:["PAULO CÉSAR DIAS","30/10/1969","127","REGULAR"],bio:["fail","fail"],right:"procedure",need:2,why:"Documento ilegível somado a duas falhas biométricas exigia o procedimento de verificação e apoio."},
+        {t:"15:12",q:37,n:"Ana Luiza Barbosa",s:"Celular na mão",d:"Meu documento está no aplicativo oficial. Depois eu já guardo o celular.",c:["#75462f","#c98c34","#251b18"],doc:["Identidade digital oficial","Ana Luiza Barbosa","09/03/2001","51.770.638-3","Aplicativo oficial","AB-0109","TELA OFICIAL"],reg:["ANA LUIZA BARBOSA","09/03/2001","127","REGULAR"],bio:["ok"],right:"allow",need:1,why:"A versão digital oficial era aceita pelas regras do protótipo, e a biometria confirmou a identidade."},
+        {t:"16:01",q:42,n:"Marcelo Vieira",s:"A fila começa a reclamar",d:"Moço, faltou uma letra no cadastro. Mas olha minha foto — está óbvio.",c:["#744832","#5c657b","#181615"],doc:["Carteira de motorista","Marcelo Vieira da Costa","11/11/1985","061303119-0","Documento com foto","MC-8511","FOTO PARECIDA"],reg:["MARCOS VIEIRA DA COSTA","11/11/1985","127","NOME E FOTO DUVIDOSOS"],bio:["fail","fail"],right:"procedure",need:2,why:"Nome diferente, foto duvidosa e duas falhas biométricas: o procedimento era obrigatório."}
+      ];
+      var st={i:0,served:0,correct:0,errors:0,bio:0,started:false};
+      var buttons=[].slice.call(document.querySelectorAll(".decision"));
+      var toastTimer=null,audio=null;
+      function el(id){return document.getElementById(id)}
+      function pad(n,l){return String(n).padStart(l,"0")}
+      function tone(kind){
+        try{
+          audio=audio||new(window.AudioContext||window.webkitAudioContext)();
+          var o=audio.createOscillator(),g=audio.createGain(),now=audio.currentTime;
+          o.type=kind==="error"?"sawtooth":"square";o.frequency.value=kind==="ok"?720:kind==="error"?165:430;
+          if(kind==="ok")o.frequency.setValueAtTime(910,now+.07);
+          g.gain.setValueAtTime(.035,now);g.gain.exponentialRampToValueAtTime(.001,now+.14);
+          o.connect(g).connect(audio.destination);o.start(now);o.stop(now+.15);
+        }catch(e){}
+      }
+      function toast(msg){
+        el("toast").textContent=msg;el("toast").classList.add("show");clearTimeout(toastTimer);
+        toastTimer=setTimeout(function(){el("toast").classList.remove("show")},2200);
+      }
+      function controls(on){buttons.forEach(function(b){b.disabled=!on});el("bioButton").disabled=!on}
+      function book(p){
+        var num=72+st.i*3,parts=p.reg[0].split(" "),first=parts[0],last=parts[parts.length-1];
+        var rows=[
+          [pad(num-1,3),first+" A. "+last,"02/01/1976","—"],
+          [pad(num,3),p.reg[0],p.reg[1],p.reg[3]],
+          [pad(num+1,3),first+" B. "+last,"19/09/1982","—"]
+        ];
+        el("bookBody").innerHTML=rows.map(function(r,i){
+          return '<tr class="'+(i===1?"current":"")+'"><td>'+r[0]+'</td><td>'+r[1]+'</td><td>'+r[2]+'</td><td>'+r[3]+"</td></tr>";
+        }).join("");
+      }
+      function render(){
+        var p=people[st.i],q=p.q+Math.max(0,st.errors*2-Math.floor(st.correct/4));st.bio=0;
+        el("time").textContent=p.t;el("termTime").textContent=p.t;el("queue").textContent=pad(q,2);
+        el("served").textContent=pad(st.served,3);el("errors").textContent=pad(st.errors,2);el("errors").classList.toggle("bad",st.errors>0);
+        el("queueFill").style.width=Math.min(100,q/45*100)+"%";el("queueFill").style.background=q>=32?"#cf5a48":q>=18?"#e69c3d":"#e4b94c";
+        el("personName").textContent=p.n;el("personSub").textContent=p.s;el("speech").textContent="“"+p.d+"”";
+        el("portrait").style.setProperty("--skin",p.c[0]);el("portrait").style.setProperty("--shirt",p.c[1]);el("portrait").style.setProperty("--hair",p.c[2]);
+        el("docType").textContent=p.doc[0];el("docName").textContent=p.doc[1];el("docBirth").textContent=p.doc[2];el("docNumber").textContent=p.doc[3];el("docNote").textContent=p.doc[4];el("docCode").textContent=p.doc[5];el("docPhoto").textContent=p.doc[6];
+        el("regName").textContent=p.reg[0];el("regBirth").textContent=p.reg[1];el("regSection").textContent=p.reg[2];el("regStatus").textContent=p.reg[3];
+        el("regStatus").className="rv "+(p.reg[3].indexOf("REGULAR")>=0?"ok":"warn");el("bioStatus").textContent="NÃO INICIADA";el("bioStatus").className="rv";
+        el("bioResult").textContent="Aguardando leitura";el("bioButton").textContent="Testar biometria";book(p);controls(true);
+        el("live").textContent=p.n+" chegou. Fila com "+q+" pessoas.";
+      }
+      function biometric(){
+        var p=people[st.i],last=p.bio[p.bio.length-1];
+        if(st.bio>=p.bio.length&&last==="fail"){toast("Duas tentativas já registradas. Consulte o manual.");tone("error");return}
+        var result=p.bio[Math.min(st.bio,p.bio.length-1)],ok=result==="ok";st.bio++;
+        el("bioStatus").textContent=ok?"CONFIRMADA":"FALHA "+st.bio+"/2";el("bioStatus").className="rv "+(ok?"ok":"warn");
+        el("bioResult").textContent=ok?"Identidade confirmada":st.bio<2?"Reposicione o dedo":"Use verificação manual";
+        el("bioButton").textContent=ok?"Biometria concluída":st.bio<2?"Tentar novamente":"Tentativas esgotadas";
+        if(ok||st.bio>=2)el("bioButton").disabled=true;tone(ok?"ok":"error");toast(ok?"Biometria confirmada.":"Biometria não reconhecida — tentativa "+st.bio+".");
+      }
+      function decide(action){
+        var p=people[st.i],right=action===p.right&&st.bio>=p.need,title,stamp,text,spent;controls(false);st.served++;
+        if(right){
+          st.correct++;title=action==="allow"?"Pessoa habilitada corretamente":action==="procedure"?"Exceção tratada corretamente":"Encaminhamento correto";
+          stamp=action==="allow"?"HABILITADO":action==="procedure"?"REGISTRADO":"ENCAMINHADO";text=p.why;spent=action==="procedure"?7:action==="redirect"?4:3;tone("ok");
+        }else{
+          st.errors++;title="Uma ocorrência foi aberta";stamp="OCORRÊNCIA";spent=action==="allow"?2:6;tone("error");
+          text=action===p.right&&st.bio<p.need?"Você escolheu a saída certa, mas pulou uma etapa obrigatória: "+(p.need===2?"eram necessárias duas tentativas biométricas.":"era necessário testar a biometria."):p.why;
+        }
+        el("feedbackTitle").textContent=title;el("feedbackStamp").textContent=stamp;el("feedbackStamp").style.color=right?"#276148":"#963f37";el("feedbackStamp").style.borderColor=right?"#276148":"#963f37";
+        el("feedbackText").textContent=text;el("feedbackMeta").textContent="TEMPO DE MESA: "+spent+" min · "+(action==="procedure"?"+2 NA FILA":action==="redirect"?"+1 NA FILA":"FILA AVANÇOU")+" · OCORRÊNCIAS: "+pad(st.errors,2);
+        el("nextButton").textContent=st.i===people.length-1?"Encerrar votação":"Próxima pessoa";el("feedbackOverlay").hidden=false;el("nextButton").focus();
+      }
+      function finish(){
+        el("feedbackOverlay").hidden=true;el("time").textContent="17:00";el("termTime").textContent="17:00";el("served").textContent=pad(st.served,3);el("errors").textContent=pad(st.errors,2);
+        el("endServed").textContent=st.served;el("endCorrect").textContent=st.correct+"/"+people.length;el("endErrors").textContent=st.errors;
+        if(st.errors===0){el("endingLine").textContent="Você manteve o procedimento mesmo quando a fila virou um corredor inteiro.";el("endSummary").textContent="A seção encerrou sem ocorrências. Você conferiu padrões com cuidado e soube quando uma exceção exigia tempo."}
+        else if(st.errors<=3){el("endingLine").textContent="A porta fechou, mas algumas decisões continuam ecoando na sala.";el("endSummary").textContent="A seção funcionou, com poucas ocorrências. A pressão fez você cortar caminho em alguns casos — exatamente a tensão central deste protótipo."}
+        else{el("endingLine").textContent="A fila andou. O procedimento, nem sempre.";el("endSummary").textContent="Houve várias ocorrências. O conflito apareceu: velocidade e certeza raramente caminham juntas."}
+        el("endOverlay").hidden=false;el("restartButton").focus();
+      }
+      function next(){el("feedbackOverlay").hidden=true;if(st.i>=people.length-1){finish();return}st.i++;render()}
+      function start(){st={i:0,served:0,correct:0,errors:0,bio:0,started:true};el("startOverlay").hidden=true;el("endOverlay").hidden=true;tone("ok");render()}
+      el("startButton").addEventListener("click",start);el("restartButton").addEventListener("click",start);el("bioButton").addEventListener("click",biometric);el("nextButton").addEventListener("click",next);
+      buttons.forEach(function(b){b.addEventListener("click",function(){decide(b.getAttribute("data-action"))})});
+      window.addEventListener("keydown",function(e){
+        if(!st.started||!el("feedbackOverlay").hidden||!el("endOverlay").hidden)return;
+        if(e.key.toLowerCase()==="b"&&!el("bioButton").disabled)biometric();
+        if(e.key==="1")decide("allow");if(e.key==="2")decide("procedure");if(e.key==="3")decide("redirect");
+      });
+    })();
+  </script>
+</body>
+</html>

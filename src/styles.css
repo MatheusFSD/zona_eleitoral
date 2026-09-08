@@ -1,0 +1,3361 @@
+/* ==========================================================================
+   Seção 127 — folha de estilo única.
+
+   Duas regras organizam tudo:
+
+   1. No desktop a mesa ocupa exatamente uma tela. Nada rola. O tamanho base
+      acompanha a altura da janela (ver html) e cada grade usa minmax(0,1fr)
+      para nunca estourar o espaço disponível.
+
+   2. A tela é a sala de aula: parede creme com barra azul, quadro-negro de
+      moldura de madeira, mesa de fórmica. Os painéis não são caixas soltas —
+      são móveis da sala.
+   ========================================================================== */
+
+:root {
+  /* a sala */
+  --wall: #f1e5c3;
+  --wall-lit: #f8f2df;
+  --dado: #5f89ae;
+  --dado-dark: #4d7397;
+  --skirting: #59402e;
+
+  /* mobiliário */
+  --board: #2f4c39;
+  --board-lit: #3d5c47;
+  --frame: #8f5d2a;
+  --frame-dark: #6f451b;
+  --deskwood: #c99457;
+  --deskwood-dark: #a97440;
+  --metal: #77838c;
+
+  /* papel e tinta */
+  --paper: #f5eeda;
+  --paper-edge: #cbbd95;
+  --paper-line: #8d805e;
+  --ink: #2b2c26;
+
+  --screen: #0d211d;
+  --glow: #bde3b5;
+  --yellow: #e0b34a;
+  --red: #9a463a;
+
+  --shadow: rgba(60, 42, 22, 0.28);
+
+  /* Teclas, no espírito das urnas: cor chapada, aresta sólida embaixo, texto
+     grande. Cada par é a face e a aresta que sustenta ela. */
+  --key: #e7e2d4;
+  --key-edge: #a49b83;
+  --key-ink: #23211c;
+  --key-green: #3f8b4e;
+  --key-green-edge: #2a6135;
+  --key-red: #c0562f;
+  --key-red-edge: #8b3c1f;
+  --key-blue: #3b6a86;
+  --key-blue-edge: #27495d;
+  --key-plum: #6b3f6a;
+  --key-plum-edge: #4b2b4a;
+  --key-clay: #8a4a33;
+  --key-clay-edge: #5f3122;
+  --key-yellow: #e6b64f;
+  --key-yellow-edge: #a97d1f;
+  --r: 0.2rem;
+  --gap: 0.6rem;
+
+  --mono: "Courier New", ui-monospace, monospace;
+  /* três letras de mão para as assinaturas do caderno */
+  --hand-0: "Caveat", "Segoe Script", cursive;
+  --hand-1: "Nothing You Could Do", "Segoe Script", cursive;
+  --hand-2: "Zeyada", "Segoe Script", cursive;
+  --serif: Georgia, "Times New Roman", serif;
+  --sans: "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
+  --chalk: "Segoe Print", "Bradley Hand", "Chalkboard SE", "Comic Sans MS", var(--serif);
+}
+
+/* O tamanho base cresce com a largura e, sobretudo, com a ALTURA da janela.
+   É isso que faz a sala inteira caber em telas baixas sem cortar nada. */
+html {
+  font-size: clamp(13px, 0.52vw + 0.95vh, 20px);
+  background: var(--wall);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+/* A página é a parede da sala: creme, com o sol entrando de um lado. */
+body {
+  margin: 0;
+  height: 100dvh;
+  overflow: hidden;
+  color: var(--ink);
+  font-family: var(--sans);
+  background:
+    radial-gradient(70% 50% at 8% 0%, rgba(255, 255, 255, 0.7), transparent 70%),
+    radial-gradient(60% 45% at 95% 100%, rgba(146, 116, 66, 0.18), transparent 70%),
+    linear-gradient(var(--wall-lit), var(--wall) 55%, #e6d9b4);
+}
+
+#root {
+  height: 100%;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 0.18rem solid #b9803a;
+  outline-offset: 0.15rem;
+}
+
+.sr {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+}
+
+/* ---------------------------------------------------------------- estrutura */
+
+.app {
+  height: 100dvh;
+  width: min(112rem, 100%);
+  margin: 0 auto;
+  padding: var(--gap);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: var(--gap);
+  overflow: hidden;
+}
+
+.board {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(14rem, 0.62fr) minmax(0, 3fr);
+  gap: var(--gap);
+}
+
+.panel {
+  min-width: 0;
+  min-height: 0;
+  border-radius: var(--r);
+  box-shadow: 0 0.4rem 1.1rem var(--shadow);
+}
+
+/* -------------------------------------------------- cabeçalho: placa da sala */
+
+.top {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.42fr) minmax(0, 1.9fr) repeat(2, minmax(0, 0.45fr)) minmax(0, 0.9fr);
+  align-items: center;
+  gap: 0.9rem;
+  padding: 0.5rem 0.9rem;
+  color: #f8f3e3;
+  background: linear-gradient(var(--dado), var(--dado-dark));
+  border-bottom: 0.25rem solid #3d5f7d;
+  border-radius: var(--r);
+  box-shadow: 0 0.4rem 1.1rem var(--shadow);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 0.7rem;
+  min-width: 0;
+}
+
+.shield {
+  flex: none;
+  width: 2.5rem;
+  height: 2.8rem;
+  display: grid;
+  place-items: center;
+  color: #4c3a10;
+  font: 800 1rem/1 var(--serif);
+  background: linear-gradient(#f0d276, var(--yellow));
+  clip-path: polygon(50% 0, 94% 18%, 84% 78%, 50% 100%, 16% 78%, 6% 18%);
+}
+
+.brand h1 {
+  margin: 0;
+  font: 800 1.15rem/1 var(--serif);
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+
+.brand p {
+  margin: 0.25rem 0 0;
+  color: #d8e6ef;
+  font: 0.62rem/1.2 var(--mono);
+  text-transform: uppercase;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.metric {
+  min-width: 0;
+  padding-left: 0.7rem;
+  border-left: 1px solid rgba(255, 255, 255, 0.28);
+}
+
+.label {
+  display: block;
+  margin-bottom: 0.2rem;
+  color: #cfe0ea;
+  font: 0.72rem/1 var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.value {
+  display: block;
+  font: 800 1.15rem/1 var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+
+.value.bad {
+  color: #ffc9ba;
+}
+
+.meter {
+  height: 0.28rem;
+  margin-top: 0.35rem;
+  background: rgba(0, 0, 0, 0.28);
+  border-radius: 1rem;
+  overflow: hidden;
+}
+
+.meter i {
+  display: block;
+  height: 100%;
+  border-radius: 1rem;
+  transition: width 0.35s ease, background 0.35s ease;
+}
+
+/* Trilha de casos, no espírito do quadro de avisos furado da parede. */
+.progress {
+  min-width: 0;
+  padding-left: 0.7rem;
+  border-left: 1px solid rgba(255, 255, 255, 0.28);
+}
+
+/* Atalho de desenvolvimento, e por isso desenhado como rascunho: tracejado,
+   discreto, sem cara de botão do jogo. */
+.pular {
+  margin-left: 0.5rem;
+  padding: 0.05rem 0.35rem;
+  color: rgba(248, 243, 227, 0.7);
+  background: none;
+  border: 1px dashed rgba(248, 243, 227, 0.5);
+  border-radius: 0.1rem;
+  font: 0.6rem/1.4 var(--mono);
+  letter-spacing: 0.04em;
+  text-transform: none;
+  cursor: pointer;
+}
+
+.pular:hover {
+  color: #fff;
+  border-color: #fff;
+}
+
+.dots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.22rem;
+  margin-top: 0.3rem;
+}
+
+.dots i {
+  width: 0.62rem;
+  height: 0.62rem;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.22);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.3);
+}
+
+.dots i.ok {
+  background: #8bd0a2;
+}
+
+.dots i.err {
+  background: #e08a76;
+}
+
+.dots i.now {
+  background: var(--yellow);
+  transform: scale(1.18);
+}
+
+/* ------------------------------------------------------ a fila no corredor */
+
+/* Um pedaço de corredor visto de lado: parede com a porta da sala, rodapé,
+   piso fugindo para o fundo e a fila em cima dele. Cabe na mesma altura que o
+   número ocupava antes. */
+.corredor-cena {
+  position: relative;
+  height: 2.8rem;
+  overflow: hidden;
+  border-radius: 0.1rem;
+  box-shadow: inset 0 0 0 1px rgba(20, 40, 60, 0.35);
+}
+
+.parede {
+  position: absolute;
+  inset: 0 0 34% 0;
+  background: #e7dcc1;
+  border-bottom: 0.14rem solid var(--skirting);
+}
+
+/* As tábuas fogem para o fundo: é o que dá a profundidade do corredor. */
+.piso {
+  position: absolute;
+  inset: 66% 0 0 0;
+  background: repeating-linear-gradient(102deg, #b6ad98 0 0.9rem, #aca391 0.9rem 1.8rem);
+}
+
+.fila-porta {
+  position: absolute;
+  left: 0.3rem;
+  bottom: 34%;
+  width: 1.5rem;
+  height: 2.2rem;
+}
+
+.corredor {
+  position: absolute;
+  left: 1.9rem;
+  right: 1.6rem;
+  bottom: 0.12rem;
+  display: flex;
+  align-items: flex-end;
+  gap: 0.06rem;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  list-style: none;
+}
+
+/* Cada pessoa é um vulto de corpo inteiro. Quanto mais para o fim da fila,
+   mais para trás no corredor: menor e mais perto do rodapé. */
+.na-fila {
+  width: 0.95rem;
+  flex: none;
+  transform-origin: bottom center;
+  transform: translateY(calc(var(--i, 0) * -0.055rem)) scale(max(0.52, calc(1 - var(--i, 0) * 0.038)));
+  animation: entrar-fila 320ms ease-out both;
+}
+
+.na-fila svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  fill: #4a5560;
+}
+
+.na-fila button {
+  display: block;
+  width: 100%;
+  padding: 0;
+  background: none;
+  border: 0;
+  cursor: default;
+}
+
+.na-fila button:not(:disabled) {
+  cursor: pointer;
+}
+
+.na-fila button:not(:disabled):hover svg {
+  fill: #26313a;
+}
+
+/* Quem tem preferência é de outra cor e pode ser chamada na frente. */
+.na-fila.preferencia svg {
+  fill: #b8770f;
+}
+
+.na-fila.anonimo svg {
+  fill: rgba(74, 85, 96, 0.34);
+}
+
+/* A marca no chão diz de quem é a vez de entrar. */
+.na-fila.vez button::after {
+  content: "";
+  display: block;
+  width: 90%;
+  height: 0.16rem;
+  margin: 0.04rem auto 0;
+  background: var(--yellow);
+  border-radius: 50%;
+  animation: chamar 1.6s ease-in-out infinite;
+}
+
+.na-fila.saindo {
+  animation: sair-fila 420ms ease-in forwards;
+  pointer-events: none;
+}
+
+@keyframes entrar-fila {
+  from {
+    width: 0;
+    opacity: 0;
+  }
+}
+
+@keyframes sair-fila {
+  to {
+    width: 0;
+    opacity: 0;
+  }
+}
+
+@keyframes chamar {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+.fila-mais {
+  position: absolute;
+  right: 0.25rem;
+  bottom: 0.2rem;
+  color: #5b6570;
+  font: 700 0.66rem/1 var(--mono);
+}
+
+/* --------------------------------------------- a pessoa, num canto da sala */
+
+.person {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  overflow: hidden;
+  background: var(--wall);
+}
+
+/* Bege e azul de escola, em planos chapados. O azul mais claro separa
+   também as camisas azuis; o contraste mais forte continua nos retratos. */
+.room {
+  --room-beige: #e7dec8;
+  --room-blue: #8aadc2;
+  position: relative;
+  min-height: 0;
+  overflow: hidden;
+  background:
+    linear-gradient(to bottom,
+      #f1e8d3 0 2%,
+      var(--room-beige) 2% 60%,
+      #c9cfbf 60% calc(60% + 2px),
+      #7298b0 calc(60% + 2px) calc(60% + 5px),
+      var(--room-blue) calc(60% + 5px) 97%,
+      #7294a6 97% 98%,
+      #647e89 98% 100%);
+}
+
+/* Retorno da parede e marcas leves nas laterais; o centro fica limpo. */
+.room::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(#d2c9b4, #d2c9b4) 5% 41% / 6% 2px no-repeat,
+    linear-gradient(#9bb9c9, #9bb9c9) 95% 78% / 7% 2px no-repeat,
+    linear-gradient(#769db5, #769db5) 3% 88% / 5% 3px no-repeat,
+    linear-gradient(90deg, #536b7614 0 3%, transparent 3% 97%, #fff4d622 97%);
+  pointer-events: none;
+}
+
+/* lâmpada fluorescente presa no teto */
+.room::after {
+  content: "";
+  position: absolute;
+  left: 7%;
+  right: 33%;
+  top: 0;
+  height: 0.5rem;
+  background: #f5f1df;
+  border: 1px solid #c8cbb9;
+  border-top: 0;
+  border-radius: 0 0 0.15rem 0.15rem;
+  box-shadow: 0.12rem 0.16rem 0 #cbc9b4;
+  pointer-events: none;
+}
+
+/* A janela é o fundo da cena: fica atrás da pessoa, inteira dentro da parede. */
+.room-window {
+  position: absolute;
+  left: 46%;
+  bottom: 27%;
+  width: 78%;
+  height: 62%;
+  transform: translateX(-50%);
+  pointer-events: none;
+}
+
+.room-fan {
+  position: absolute;
+  right: 2%;
+  top: 3%;
+  width: 28%;
+  max-height: 24%;
+  pointer-events: none;
+}
+
+.blades {
+  transform-box: view-box;
+  transform-origin: 63px 58px;
+  animation: spin 2.4s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* papel colado na parede com fita crepe */
+.tape-note {
+  position: absolute;
+  left: 6%;
+  top: 5%;
+  width: 54%;
+  padding: 0.3rem 0.35rem;
+  color: #55523f;
+  background: #f2ebd9;
+  box-shadow: 0.1rem 0.15rem 0 #c9c3ae;
+  font: 0.68rem/1.4 var(--mono);
+  letter-spacing: 0.04em;
+  text-align: center;
+  text-transform: uppercase;
+  transform: rotate(-1.6deg);
+}
+
+.tape-note::before {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: -0.3rem;
+  width: 1.6rem;
+  height: 0.55rem;
+  background: rgba(226, 214, 176, 0.85);
+  box-shadow: inset 0 0 0 1px rgba(160, 146, 106, 0.5);
+  transform: translateX(-50%) rotate(2deg);
+}
+
+/* A pessoa fica de pé na frente da parede, ancorada embaixo. */
+.portrait {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  overflow: hidden;
+}
+
+.portrait svg,
+.portrait img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center bottom;
+  filter: drop-shadow(0 0.4rem 0.45rem rgba(46, 34, 18, 0.4));
+}
+
+/* A pessoa entra andando pela esquerda como um vulto preto e só ganha cor
+   depois de parar na frente da mesa. `brightness(0)` zera a cor de tudo e
+   preserva o recorte, então a silhueta é o próprio desenho. O estado final
+   é o normal: com movimento reduzido a animação some e nada quebra. */
+.arrival {
+  display: grid;
+  min-height: 0;
+  animation: chegar 950ms ease-out both;
+}
+
+/* A ida e a volta da cabina. */
+.arrival.fora {
+  animation: ir-votar 700ms ease-in both;
+}
+
+.arrival.voltando {
+  animation: voltar-da-cabina 700ms ease-out both;
+}
+
+@keyframes ir-votar {
+  to {
+    opacity: 0;
+    transform: translateX(38%) scale(0.94);
+  }
+}
+
+@keyframes voltar-da-cabina {
+  from {
+    opacity: 0;
+    transform: translateX(38%) scale(0.94);
+  }
+}
+
+@keyframes chegar {
+  0% {
+    transform: translate(-64%, 0);
+    filter: brightness(0);
+  }
+  16% {
+    transform: translate(-48%, -1.4%);
+  }
+  32% {
+    transform: translate(-32%, 0);
+  }
+  48% {
+    transform: translate(-14%, -1.4%);
+  }
+  58%,
+  76% {
+    transform: translate(0, 0);
+    filter: brightness(0);
+  }
+  100% {
+    transform: translate(0, 0);
+    filter: brightness(1);
+  }
+}
+
+@keyframes fala {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Ficha de papel apoiada embaixo: quem é e o que disse. Só fica legível
+   depois que a pessoa para e aparece. */
+.person-card {
+  animation: fala 320ms ease-out 700ms both;
+  padding: 0.65rem 0.7rem 0.75rem;
+  text-align: center;
+  background:
+    radial-gradient(90% 60% at 50% 0%, rgba(255, 255, 255, 0.6), transparent 70%),
+    var(--paper);
+  border-top: 0.18rem solid var(--frame);
+  box-shadow: 0 -0.35rem 0.7rem rgba(60, 42, 22, 0.22);
+}
+
+.person-card h2 {
+  margin: 0;
+  font: 700 1.1rem/1.15 var(--serif);
+}
+
+.person-card .tag {
+  margin: 0.2rem 0 0.5rem;
+  color: #7c745c;
+  font: 0.74rem/1.3 var(--mono);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.speech {
+  position: relative;
+  margin: 0;
+  padding: 0.55rem 0.6rem;
+  color: #3a3b33;
+  text-align: left;
+  background: #fffaea;
+  border: 1px solid var(--paper-edge);
+  border-radius: 0.15rem;
+  font: 0.95rem/1.4 var(--serif);
+}
+
+.speech::before,
+.speech::after {
+  content: "";
+  position: absolute;
+  left: 1.3rem;
+  border: 0.42rem solid transparent;
+}
+
+.preferencia-tag {
+  display: inline-block;
+  margin: 0 0 0.5rem;
+  padding: 0.1rem 0.45rem;
+  color: #6b4a12;
+  background: var(--key-yellow);
+  border-radius: 0.1rem;
+  font: 700 0.66rem/1.4 var(--mono);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* --------------------------------------------------------- a conversa --- */
+
+.conversa {
+  display: grid;
+  gap: 0.5rem;
+  text-align: left;
+}
+
+/* O que já foi dito, do mais antigo para o mais novo. */
+.dito {
+  display: grid;
+  gap: 0.5rem;
+  max-height: 11rem;
+  overflow: auto;
+}
+
+.troca {
+  display: grid;
+  gap: 0.15rem;
+}
+
+/* A mesa fala em letra de máquina; a pessoa responde à mão, entre aspas. */
+.mesa-fala {
+  margin: 0;
+  color: #6f6752;
+  font: 0.68rem/1.35 var(--mono);
+}
+
+.perguntas {
+  display: grid;
+  gap: 0.25rem;
+}
+
+.pergunta {
+  padding: 0.3rem 0.5rem;
+  color: #45402f;
+  background: #efe7d2;
+  border: 0;
+  border-left: 0.2rem solid var(--frame);
+  border-radius: 0.1rem;
+  box-shadow: 0 0.12rem 0 #c7b992;
+  font: 700 0.72rem/1.25 var(--sans);
+  text-align: left;
+  cursor: pointer;
+}
+
+.pergunta:hover {
+  background: #f8f2e2;
+}
+
+.pergunta:active {
+  transform: translateY(0.08rem);
+  box-shadow: 0 0.02rem 0 #c7b992;
+}
+
+/* A resposta da pessoa: um segundo balão, abaixo da primeira fala. */
+.resposta {
+  margin: 0.45rem 0 0;
+  padding-top: 0.4rem;
+  border-top: 1px dashed var(--paper-line);
+  color: #46422f;
+  font: 700 0.74rem/1.35 var(--serif);
+}
+
+.speech::before {
+  top: -0.86rem;
+  border-bottom-color: var(--paper-edge);
+}
+
+.speech::after {
+  top: -0.78rem;
+  border-bottom-color: #fffaea;
+}
+
+/* ------------------------------------------------ a mesa receptora (fórmica) */
+
+.mesa {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  gap: 0.4rem;
+}
+
+/* Borda e estrutura aparecem abaixo do tampo. Os documentos continuam num
+   plano sem perspectiva, para preservar a leitura e as coordenadas do arrasto. */
+.carteira {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+  padding: 0.35rem 0.55rem 3.3rem;
+  background: #d7cfba;
+  border-radius: 0.4rem;
+}
+
+.carteira::before {
+  content: "";
+  position: absolute;
+  left: 7%;
+  right: 5%;
+  bottom: 0.25rem;
+  height: 1.15rem;
+  background: #797b6630;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.carteira-tampo {
+  position: relative;
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  padding: 1.15rem 1.1rem 1.25rem;
+  background: #c5b086;
+  border: solid;
+  border-width: 0.16rem 0.22rem 0.2rem 0.16rem;
+  border-color: #eddbb4 #a58b5e #a78d61 #dfc79a;
+  border-radius: 1.35rem 1.35rem 1.65rem 1.65rem;
+  box-shadow: inset 0 0 0 1px #b79f72, 0 0.2rem 0 #927449;
+}
+
+.carteira-tampo::after {
+  content: none;
+  position: absolute;
+  left: -0.16rem;
+  right: -0.22rem;
+  bottom: -0.95rem;
+  height: 1.15rem;
+  background: linear-gradient(to bottom,
+    #b09360 0 28%, #cfb17a 28% 40%, #aa8756 40% 67%,
+    #bf9e68 67% 76%, #886b47 76% 100%);
+  border-radius: 0 0 1.25rem 1.25rem;
+  box-shadow: 0 0.2rem 0 #695b4433;
+  pointer-events: none;
+}
+
+.carteira-marcas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-height: 42rem;
+  top: auto;
+  pointer-events: none;
+}
+
+.carteira-sulco {
+  position: absolute;
+  top: 0.38rem;
+  left: 41%;
+  width: 16%;
+  height: 0.3rem;
+  background: #ae956b;
+  border-radius: 1rem;
+  box-shadow: inset 0 0.09rem 0 #97835e, 0 0.08rem 0 #e5cfa3;
+  pointer-events: none;
+}
+
+.carteira-patrimonio {
+  position: absolute;
+  right: 7%;
+  bottom: -0.6rem;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.12rem 0.4rem;
+  color: #dbe0cd;
+  background: #64796f;
+  border: 1px solid #859688;
+  border-radius: 0.1rem;
+  font: 0.42rem/1 var(--sans);
+  letter-spacing: 0.06em;
+  pointer-events: none;
+}
+
+.carteira-patrimonio b {
+  font-weight: 600;
+}
+
+.carteira-estrutura {
+  position: absolute;
+  left: 6%;
+  right: 6%;
+  bottom: 0.45rem;
+  height: 4rem;
+  pointer-events: none;
+}
+
+.carteira-travessa {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 1.9rem;
+  height: 0.8rem;
+  background: #577e91;
+  border-top: 0.15rem solid #89a7ad;
+  border-bottom: 0.18rem solid #3c606f;
+  border-radius: 0.2rem;
+}
+
+.carteira-perna {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1.15rem;
+  background: linear-gradient(90deg, #466d80 0 20%, #83a3ad 20% 35%, #638c9e 35% 80%, #3f6476 80%);
+  border-radius: 0.3rem 0.3rem 0.2rem 0.2rem;
+}
+
+.carteira-perna.esquerda {
+  left: 0;
+  transform: rotate(4deg);
+}
+
+.carteira-perna.direita {
+  right: 0;
+  transform: rotate(-4deg);
+}
+
+.carteira-perna::after {
+  content: "";
+  position: absolute;
+  left: -0.1rem;
+  right: -0.1rem;
+  bottom: -0.05rem;
+  height: 0.55rem;
+  background: #47585a;
+  border-top: 0.12rem solid #71807c;
+  border-radius: 0.1rem 0.1rem 0.25rem 0.25rem;
+}
+
+/* A superfície solta: tudo o que está em cima da mesa mora aqui dentro. */
+.mesa-superficie {
+  position: relative;
+  min-height: 0;
+  /* A pilha das peças é assunto interno da mesa: sem isto, o objeto tocado
+     por último acabaria passando por cima das janelas do jogo. */
+  isolation: isolate;
+  /* Visível, e não recortado, porque um objeto arrastado até a pessoa precisa
+     atravessar a borda esquerda da mesa. */
+  overflow: visible;
+
+  /* A carteira tem 62 cm de largura, e é essa a régua de tudo o que fica em
+     cima dela: `--cm` é um centímetro de verdade na tela. Um documento tem
+     10 cm, o celular 7,2, a folha do caderno 21 por 29,7. */
+  container-type: size;
+  --cm: min(1.32rem, 3.9cqh, 1.85cqw);
+}
+
+/* ------------------------------------------------------ peças arrastáveis -- */
+
+.piece {
+  position: absolute;
+  touch-action: none;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+  /* Fora do arrasto, mudar de lugar é um deslize: é assim que um objeto
+     recusado volta para onde estava. */
+  transition: left 0.22s ease, top 0.22s ease;
+  filter: drop-shadow(0.15rem 0.3rem 0.35rem rgba(60, 40, 16, 0.4));
+}
+
+.piece.dragging {
+  cursor: grabbing;
+  transition: none;
+  filter: drop-shadow(0.3rem 0.6rem 0.7rem rgba(60, 40, 16, 0.45));
+}
+
+/* A peça da vez acende: o brilho diz de quem é o próximo passo, sem desenhar
+   uma moldura em volta do objeto. */
+.piece.vez {
+  animation: vez 1.8s ease-in-out infinite;
+}
+
+@keyframes vez {
+  0%,
+  100% {
+    filter: drop-shadow(0.15rem 0.3rem 0.35rem rgba(60, 40, 16, 0.4)) drop-shadow(0 0 0.5rem rgba(224, 179, 74, 0.55));
+  }
+
+  50% {
+    filter: drop-shadow(0.15rem 0.3rem 0.35rem rgba(60, 40, 16, 0.4)) drop-shadow(0 0 1.1rem rgba(240, 200, 110, 0.95));
+  }
+}
+
+.piece button {
+  cursor: pointer;
+}
+
+/* Mesma tecla da urna, em tamanho de objeto de mesa. */
+.piece .ghost {
+  padding: 0.35rem 0.6rem 0.4rem;
+  color: var(--key-ink);
+  background: var(--key);
+  border: 0;
+  border-radius: 0.12rem;
+  box-shadow: 0 0.18rem 0 var(--key-edge);
+  font: 800 0.78rem/1.1 var(--sans);
+  letter-spacing: 0.01em;
+  transition: transform 0.06s ease, box-shadow 0.06s ease;
+}
+
+.piece .ghost:hover:not(:disabled) {
+  filter: brightness(1.05);
+}
+
+.piece .ghost:active:not(:disabled) {
+  transform: translateY(0.14rem);
+  box-shadow: 0 0.04rem 0 var(--key-edge);
+}
+
+.piece .ghost:disabled {
+  color: #6f6a5c;
+  background: #d9d3c2;
+  box-shadow: 0 0.18rem 0 #b0a893;
+  cursor: default;
+}
+
+.piece .ghost.mini {
+  padding: 0.25rem 0.45rem 0.3rem;
+  font-size: 0.68rem;
+}
+
+/* A pessoa joga na mesa o que é dela: o documento quando chega, os pertences
+   antes de ir para a cabina. O estado final é o normal do objeto, então
+   `prefers-reduced-motion` desliga sem deixar nada fora do lugar. */
+.piece.chegando {
+  animation: jogado 620ms cubic-bezier(0.2, 0.75, 0.3, 1) both;
+}
+
+@keyframes jogado {
+  from {
+    opacity: 0;
+    transform: translate(-16rem, -2.5rem) rotate(-28deg);
+  }
+
+  25% {
+    opacity: 1;
+  }
+
+  72% {
+    transform: translate(0.5rem, 0.4rem) rotate(7deg);
+  }
+
+  to {
+    transform: translate(0, 0) rotate(0);
+  }
+}
+
+.doc-devolver {
+  position: absolute;
+  right: 0.35rem;
+  bottom: 0.35rem;
+}
+
+/* --------------------------------------------------------- os documentos -- */
+
+.doc {
+  position: relative;
+  width: calc(10 * var(--cm));
+  padding: 0.5rem 0.55rem;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--paper-edge);
+  border-radius: 0.1rem;
+  font: 0.72rem/1.35 var(--sans);
+}
+
+.doc header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin: -0.5rem -0.55rem 0.5rem;
+  padding: 0.3rem 0.55rem;
+  color: #fdf8ea;
+  font: 700 0.66rem/1.2 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.doc footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin: 0.45rem -0.55rem -0.5rem;
+  padding: 0.25rem 0.55rem;
+  color: #7a7259;
+  border-top: 1px solid var(--paper-edge);
+  font: 0.6rem/1.3 var(--mono);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.doc-field small {
+  display: block;
+  color: #7f7659;
+  font: 0.6rem/1.1 var(--mono);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.doc-field strong {
+  display: block;
+  font: 700 0.82rem/1.25 var(--sans);
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: break-word;
+}
+
+.doc-field.wide {
+  grid-column: 1 / -1;
+}
+
+/* A identificação é o número que a mesa digita: tem faixa própria, da largura
+   do documento, e é o mesmo desenho em todos eles. */
+.doc-code {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin-top: 0.4rem;
+  padding: 0.2rem 0.4rem;
+  background: #f7efd9;
+  border: 1px dashed #ab9358;
+}
+
+.doc-code small {
+  color: #8a7440;
+  font: 0.58rem/1.1 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.doc-code b {
+  margin-left: auto;
+  font: 800 1.05rem/1 var(--mono);
+  letter-spacing: 0.16em;
+}
+
+.doc-photo {
+  width: calc(2.8 * var(--cm));
+  flex: none;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background: #ded2b4;
+  border: 1px solid var(--paper-edge);
+}
+
+/* O retrato é desenhado de corpo inteiro; a foto do documento é um recorte
+   do rosto, ampliado dentro da moldura. */
+.doc-photo svg,
+.doc-photo img {
+  display: block;
+  width: 132%;
+  height: 142%;
+  margin: -8% 0 0 -16%;
+}
+
+.doc-photo.antiga {
+  filter: sepia(0.5) contrast(0.92);
+}
+
+.doc-photo.vazia {
+  display: grid;
+  place-items: center;
+  color: #8b8265;
+  background: repeating-linear-gradient(45deg, #e4d9bd 0 0.3rem, #dcd0b0 0.3rem 0.6rem);
+  font: 700 0.62rem/1.2 var(--mono);
+  letter-spacing: 0.08em;
+  text-align: center;
+}
+
+/* identidade */
+.doc-identidade {
+  width: calc(13.5 * var(--cm));
+  overflow: hidden;
+  border-radius: 0.55rem;
+}
+
+.doc-identidade header {
+  background: #4b7ba4;
+}
+
+.doc-identidade.velha {
+  background: #efe3c6;
+}
+
+.doc-identidade.velha header {
+  background: #6f7f8d;
+}
+
+.rg-corpo {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.5rem;
+}
+
+.rg-esquerda {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.rg-digital {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.12rem;
+  height: 0.9rem;
+  padding: 0.12rem;
+  background: #e7dcc0;
+  border: 1px solid var(--paper-edge);
+}
+
+.rg-digital i {
+  background: repeating-linear-gradient(90deg, #9a8b62 0 1px, transparent 1px 3px);
+}
+
+.rg-campos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-content: start;
+  gap: 0.3rem 0.5rem;
+}
+
+.rg-campos .doc-code {
+  grid-column: 1 / -1;
+}
+
+/* habilitação */
+.doc-habilitacao {
+  width: calc(13 * var(--cm));
+  border-radius: 0.5rem;
+  overflow: hidden;
+  background: #f3ecd5;
+}
+
+.doc-habilitacao header {
+  background: #6f7d3f;
+}
+
+.doc-habilitacao header b {
+  padding: 0.05rem 0.3rem;
+  color: #4a5528;
+  background: #dfe4c2;
+  border-radius: 0.08rem;
+}
+
+.cnh-corpo {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.55rem;
+}
+
+.cnh-campos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-content: start;
+  gap: 0.3rem 0.5rem;
+}
+
+.cnh-campos .doc-code {
+  grid-column: 1 / -1;
+}
+
+/* profissional */
+.doc-profissional {
+  width: calc(12 * var(--cm));
+  border-radius: 0.4rem;
+  overflow: hidden;
+  background: #eef0ee;
+}
+
+.doc-profissional header {
+  background: #5c657b;
+}
+
+.prof-corpo {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: 0.55rem;
+}
+
+.prof-esquerda {
+  display: grid;
+  gap: 0.3rem;
+}
+
+.prof-campos {
+  position: relative;
+  display: grid;
+  align-content: start;
+  gap: 0.3rem;
+}
+
+.prof-carimbo {
+  position: absolute;
+  right: 0.2rem;
+  bottom: -0.2rem;
+  display: grid;
+  place-items: center;
+  width: 3.2rem;
+  height: 3.2rem;
+  color: #8d5040;
+  border: 0.14rem solid #8d5040;
+  border-radius: 50%;
+  font: 700 0.66rem/1 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.55;
+  transform: rotate(-12deg);
+}
+
+/* identidade digital, na tela do celular */
+.doc-digital {
+  width: calc(7.2 * var(--cm));
+  min-height: calc(14.4 * var(--cm));
+  padding: 0;
+  background: #23282a;
+  border: 0.22rem solid #14181a;
+  border-radius: 0.9rem;
+}
+
+.fone-topo {
+  display: grid;
+  place-items: center;
+  height: 0.85rem;
+}
+
+.fone-alto {
+  width: 2.2rem;
+  height: 0.2rem;
+  background: #454c4f;
+  border-radius: 0.2rem;
+}
+
+.fone-tela {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
+  gap: 0.35rem;
+  margin: 0 0.3rem;
+  padding: 0.4rem 0.45rem 0.6rem;
+  background: #f6f2e6;
+  border-radius: 0.2rem;
+}
+
+.app-barra {
+  justify-self: stretch;
+  margin: -0.4rem -0.45rem 0;
+  padding: 0.25rem 0.4rem;
+  color: #eaf3ec;
+  background: #2f6b4a;
+  border-radius: 0.2rem 0.2rem 0 0;
+  font: 700 0.62rem/1.2 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.doc-digital .doc-photo.redonda {
+  width: calc(2.6 * var(--cm));
+  aspect-ratio: 1;
+  border-radius: 50%;
+}
+
+.app-nome {
+  justify-self: stretch;
+  font: 700 0.82rem/1.2 var(--sans);
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.app-linhas {
+  justify-self: stretch;
+  display: grid;
+  gap: 0.25rem;
+  text-align: center;
+}
+
+.doc-digital .doc-field strong {
+  font-size: 0.74rem;
+}
+
+.doc-digital .app-nome {
+  font-size: 0.78rem;
+}
+
+.doc-digital .doc-code b {
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+}
+
+.doc-digital .doc-code {
+  justify-self: stretch;
+  display: grid;
+  justify-items: center;
+  gap: 0.05rem;
+  text-align: center;
+}
+
+.doc-digital .doc-code b {
+  margin-left: 0;
+}
+
+.app-selo {
+  color: #2f6b4a;
+  font: 700 0.6rem/1.2 var(--mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.fone-baixo {
+  width: 3rem;
+  height: 0.18rem;
+  margin: 0.35rem auto 0.3rem;
+  background: #454c4f;
+  border-radius: 0.2rem;
+}
+
+/* certidão */
+.doc-certidao {
+  width: calc(14 * var(--cm));
+  padding: 0.35rem;
+  background: #fbf8ee;
+}
+
+.cert-borda {
+  display: grid;
+  justify-items: center;
+  gap: 0.3rem;
+  padding: 0.6rem 0.5rem 0.7rem;
+  border: 0.18rem double #9d9070;
+}
+
+.cert-orgao {
+  margin: 0;
+  color: #7f7659;
+  font: 0.6rem/1.2 var(--mono);
+  letter-spacing: 0.06em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.doc-certidao h3 {
+  margin: 0;
+  font: 700 0.98rem/1.15 var(--serif);
+  text-align: center;
+}
+
+.cert-nome {
+  margin: 0;
+  font: 700 0.92rem/1.2 var(--serif);
+  text-align: center;
+}
+
+.cert-linhas {
+  justify-self: stretch;
+  display: grid;
+  gap: 0.3rem;
+}
+
+.doc-certidao .doc-code {
+  justify-self: stretch;
+}
+
+.cert-nota {
+  margin: 0;
+  color: #7f7659;
+  font: 0.62rem/1.2 var(--mono);
+  text-transform: uppercase;
+}
+
+.cert-selo {
+  display: grid;
+  place-items: center;
+  width: 2.4rem;
+  height: 2.4rem;
+  border: 1px solid #9d9070;
+  border-radius: 50%;
+}
+
+.cert-selo span {
+  width: 1.5rem;
+  height: 1.5rem;
+  background: repeating-linear-gradient(45deg, #cfc3a0 0 2px, transparent 2px 4px);
+  border-radius: 50%;
+}
+
+.doc-vazio {
+  display: grid;
+  place-items: center;
+  min-height: 6rem;
+  color: #8b8265;
+  font: 0.6rem/1.4 var(--mono);
+}
+
+/* ---------------------------------------------------------- o terminal --- */
+
+.terminal {
+  position: relative;
+  isolation: isolate;
+  width: calc(20 * var(--cm));
+  max-width: calc(100vw - 4rem);
+  display: grid;
+  gap: 0.55rem;
+  padding: 0.8rem 1rem 1.2rem;
+  color: var(--glow);
+}
+
+.terminal-carcaca {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.terminal-cabo {
+  position: absolute;
+  width: 4rem;
+  height: 7rem;
+  right: -1.9rem;
+  top: 0.8rem;
+  z-index: -2;
+  pointer-events: none;
+}
+
+.terminal-marca,
+.terminal-frente {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  color: #657873;
+}
+
+.terminal-marca {
+  padding: 0 0.25rem;
+  font: 700 0.65rem/1.3 var(--sans);
+  letter-spacing: 0.12em;
+}
+
+.terminal-marca b {
+  margin-left: 0.2rem;
+  padding: 0.12rem 0.3rem;
+  color: #e8e8d6;
+  background: #657f80;
+  border-radius: 0.15rem;
+}
+
+.terminal-marca > span {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font: 0.55rem/1 var(--mono);
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.terminal-marca i {
+  width: 0.35rem;
+  height: 0.35rem;
+  background: #91b86f;
+  border: 1px solid #668467;
+  border-radius: 50%;
+  box-shadow: 0 1px 0 #f4efda;
+}
+
+.terminal-console {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  align-items: start;
+  gap: 0.7rem;
+}
+
+.terminal-moldura {
+  min-width: 0;
+  padding: 0.4rem 0.4rem 0;
+  background: #748781;
+  border: 0.15rem solid;
+  border-color: #a3ada0 #c6cbb9 #f0ead7 #a3ada0;
+  border-radius: 0.6rem;
+}
+
+.terminal-legenda {
+  display: block;
+  padding: 0.3rem 0;
+  color: #e0e1ce;
+  font: 0.48rem/1.2 var(--sans);
+  letter-spacing: 0.1em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.terminal-frente {
+  min-height: 0.9rem;
+  padding: 0 0.15rem;
+}
+
+.aparelho-parafuso {
+  flex: none;
+  width: 0.35rem;
+  height: 0.35rem;
+  border: 1px solid #929d90;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #b6bdab 40%, #78897f 40% 58%, #b6bdab 58%);
+  box-shadow: 0 1px 0 #f0ecd7;
+}
+
+.terminal-respiros {
+  width: 3.4rem;
+  height: 0.55rem;
+  background: repeating-linear-gradient(90deg, #7f9086 0 2px, transparent 2px 5px);
+  border-bottom: 1px solid #ebe7d2;
+}
+
+.terminal-patrimonio {
+  padding: 0.1rem 0.3rem;
+  color: #768277;
+  background: #eae5d0;
+  font: 0.45rem/1.2 var(--mono);
+  letter-spacing: 0.06em;
+}
+
+.screen {
+  display: grid;
+  grid-template-rows: auto minmax(11rem, 1fr) auto;
+  gap: 0.4rem;
+  padding: 0.45rem;
+  background:
+    repeating-linear-gradient(0deg, transparent 0 0.18rem, rgba(255, 255, 255, 0.03) 0.19rem 0.2rem),
+    linear-gradient(135deg, #263e34 0 12%, #172e26 12% 100%);
+  border: 0.18rem solid #344e43;
+  border-radius: 0.3rem;
+  box-shadow: inset 0.13rem 0.18rem 0 #0f221c;
+  font: 0.78rem/1.35 var(--mono);
+}
+
+.term-head,
+.term-foot {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.4rem;
+  color: #86c79a;
+  font-size: 0.57rem;
+  letter-spacing: 0.02em;
+}
+
+.term-head strong {
+  color: var(--glow);
+}
+
+.term-rows {
+  display: grid;
+  align-content: start;
+  gap: 0.12rem;
+}
+
+.term-rows .row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.4rem;
+  padding-bottom: 0.16rem;
+  border-bottom: 1px solid #2b4335;
+}
+
+.term-rows .row span {
+  color: #7fae86;
+  font-size: 0.58rem;
+  letter-spacing: 0.02em;
+  flex-shrink: 0;
+}
+
+.rv {
+  font-weight: 700;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.rv.ok {
+  color: #8fe0a4;
+}
+
+.rv.warn {
+  color: #e8c06a;
+}
+
+.term-ask {
+  display: grid;
+  align-content: center;
+  justify-items: center;
+  gap: 0.45rem;
+  text-align: center;
+}
+
+.term-ask p {
+  margin: 0;
+  color: #9fd6ac;
+  font-size: 0.7rem;
+  letter-spacing: 0.04em;
+}
+
+.term-ask small {
+  color: #7fae86;
+  font-size: 0.72rem;
+  line-height: 1.3;
+}
+
+.term-digits {
+  display: flex;
+  width: 100%;
+  justify-content: center;
+  gap: 0.28rem;
+}
+
+.term-digits i {
+  display: grid;
+  place-items: center;
+  width: min(1.45rem, 20%);
+  height: 2.2rem;
+  color: #6f9c7c;
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid #2c5442;
+  font: 700 1.35rem/1 var(--mono);
+  font-style: normal;
+}
+
+.term-digits i.cheio {
+  color: var(--glow);
+  border-color: #4f8f6a;
+}
+
+.caret {
+  width: 0.4rem;
+  height: 0.6rem;
+  background: var(--glow);
+  animation: blink 1.1s steps(1) infinite;
+}
+
+.teclado {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.45rem 0.35rem;
+  padding: 0.45rem 0.4rem 0.65rem;
+  background: #b1b7a7;
+  border-radius: 0.45rem;
+  box-shadow: inset 0.1rem 0.15rem 0 #9ba795, 0 1px 0 #f5efdc;
+}
+
+.teclado-guia {
+  align-self: center;
+  color: #8e9c8c;
+  text-align: center;
+  font-size: 0.4rem;
+}
+
+/* A tecla é um bloco: face chapada, aresta embaixo, e ela afunda quando é
+   apertada — o mesmo gesto de uma urna. */
+.tecla {
+  min-height: 2rem;
+  padding: 0.38rem 0 0.42rem;
+  color: var(--key-ink);
+  background: #f0ecdc;
+  border: 1px solid #f9f4e4;
+  border-radius: 0.25rem;
+  box-shadow: 0 0.22rem 0 #7e8b7d, 0 0.27rem 0 #627569;
+  font: 800 1.2rem/1 var(--sans);
+  transition: transform 0.06s ease, box-shadow 0.06s ease;
+}
+
+.tecla:hover {
+  filter: brightness(1.05);
+}
+
+.tecla:active {
+  transform: translateY(0.18rem);
+  box-shadow: 0 0.04rem 0 var(--key-edge);
+}
+
+.tecla.corrige {
+  grid-column: 1 / -1;
+  color: #fdf1ea;
+  background: var(--key-red);
+  box-shadow: 0 0.22rem 0 var(--key-red-edge);
+  border-color: #d27b54;
+  font-size: 0.65rem;
+  letter-spacing: 0.04em;
+}
+
+.tecla.corrige:active {
+  box-shadow: 0 0.04rem 0 var(--key-red-edge);
+}
+
+.tecla.confirma {
+  grid-column: 1 / -1;
+  color: #eff8ec;
+  background: var(--key-green);
+  box-shadow: 0 0.22rem 0 var(--key-green-edge);
+  border-color: #6ba372;
+  font-size: 0.65rem;
+  letter-spacing: 0.04em;
+}
+
+.tecla.confirma:active {
+  box-shadow: 0 0.04rem 0 var(--key-green-edge);
+}
+
+/* ------------------------------------------------------------ o caderno -- */
+
+.book {
+  width: calc(19 * var(--cm));
+  min-height: calc(11 * var(--cm));
+  grid-template-rows: auto 1fr auto;
+  display: grid;
+  gap: 0.3rem;
+  padding: 0.45rem 0.5rem 0.5rem;
+  background: var(--paper);
+  border: 1px solid var(--paper-edge);
+  border-radius: 0.1rem;
+  box-shadow: inset 0 0 0 0.28rem #efe6cd, 0 0.16rem 0 #d3c8a9, 0 0.27rem 0 #ece2c8;
+}
+
+.book-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding-bottom: 0.25rem;
+  border-bottom: 0.12rem solid var(--paper-line);
+}
+
+.book-head strong {
+  font: 700 0.92rem/1.1 var(--serif);
+}
+
+.book-head span {
+  color: #7c745c;
+  font: 0.66rem/1 var(--mono);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.book table {
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+  font: 0.74rem/1.25 var(--mono);
+}
+
+.book th {
+  padding: 0.15rem 0.2rem;
+  color: #7c745c;
+  border-bottom: 1px solid var(--paper-line);
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.book td {
+  padding: 0.16rem 0.2rem;
+  overflow-wrap: anywhere;
+  border-bottom: 1px dotted #cfc3a0;
+}
+
+.book col.c-num {
+  width: 9%;
+}
+
+.book col.c-birth {
+  width: 24%;
+}
+
+.book col.c-sign {
+  width: 25%;
+}
+
+/* A folha inteira à vista: o caderno é papel, não uma janelinha com rolagem. */
+.book-rolo {
+  min-height: 0;
+}
+
+.book-pages {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  margin-top: 0.4rem;
+  padding-top: 0.35rem;
+  border-top: 1px solid #c5b68e;
+  color: #716b53;
+}
+
+.book-pages > span {
+  display: grid;
+  gap: 0.15rem;
+  text-align: center;
+  font: 0.65rem/1.2 var(--mono);
+}
+
+.book-pages small {
+  font-size: 0.57rem;
+}
+
+.book-turn {
+  min-width: 2rem;
+  min-height: 1.8rem;
+  padding: 0.25rem 0.5rem;
+  color: #5a6658;
+  background: #e5dbc1;
+  border: 0;
+  border-radius: 0.1rem;
+  box-shadow: 0 0.12rem 0 #baae8e;
+}
+
+.book-turn:hover:not(:disabled) {
+  background: #d8ccb0;
+}
+
+.book-turn:active:not(:disabled) {
+  transform: translateY(0.1rem);
+  box-shadow: none;
+}
+
+.book-turn:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.book .firma {
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+/* Cada pessoa assina com uma das três letras de mão. */
+.firma {
+  display: block;
+  color: #2c3560;
+  font-size: 1.2rem;
+  line-height: 1;
+  white-space: nowrap;
+  transform: rotate(-2.5deg);
+}
+
+.firma.m0 {
+  font-family: var(--hand-0);
+  font-weight: 600;
+}
+
+.firma.m1 {
+  font-family: var(--hand-1);
+  font-size: 0.95rem;
+}
+
+.firma.m2 {
+  font-family: var(--hand-2);
+  font-size: 1.32rem;
+  transform: rotate(-4deg);
+}
+
+.book tr.marcada {
+  background: #f2e6bd;
+}
+
+.linha {
+  width: 100%;
+  padding: 0.06rem 0.1rem;
+  color: inherit;
+  background: none;
+  border: 0;
+  border-radius: 0.08rem;
+  font: inherit;
+  text-align: left;
+}
+
+.linha:hover:not(:disabled) {
+  background: #e8dcb2;
+  outline: 1px solid #c3b17a;
+}
+
+.linha:disabled {
+  cursor: default;
+}
+
+.assinatura {
+  text-align: center;
+}
+
+.visto {
+  color: #5b8a4a;
+  font-weight: 700;
+}
+
+
+.assinar {
+  padding: 0.15rem 0.4rem 0.2rem;
+  color: #2f3560;
+  background: #e6e2f0;
+  border: 0;
+  border-radius: 0.1rem;
+  box-shadow: 0 0.14rem 0 #8b8fb4;
+  font: 800 0.68rem/1.2 var(--sans);
+}
+
+.assinar:active {
+  transform: translateY(0.1rem);
+  box-shadow: 0 0.03rem 0 #8b8fb4;
+}
+
+/* -------------------------------------------------- leitor e pertences -- */
+
+/* O leitor é um aparelho, não um cartão: caixa de plástico com topo claro,
+   frente mais escura, marca gravada, luz de estado e o cabo saindo por trás. */
+.leitor {
+  position: relative;
+  isolation: isolate;
+  width: calc(7 * var(--cm));
+  display: grid;
+  justify-items: stretch;
+  gap: 0.45rem;
+  padding: 0.65rem 0.6rem 0.5rem;
+  background: #dedbc7;
+  border: solid;
+  border-width: 0.15rem 0.25rem 0.55rem 0.15rem;
+  border-color: #f1edd9 #b0b8a7 #8b9a90 #eae6d1;
+  border-radius: 2.3rem 2.3rem 1.2rem 1.2rem;
+  box-shadow:
+    0 0.25rem 0 #5f736c,
+    inset 0 -0.15rem 0 #bec5b2;
+}
+
+/* Os pés de borracha, que é o que faz o aparelho pousar na carteira. */
+.leitor::after {
+  content: "";
+  position: absolute;
+  left: 0.6rem;
+  right: 0.6rem;
+  bottom: -0.95rem;
+  height: 0.3rem;
+  background: linear-gradient(90deg, #425953 0 22%, transparent 22% 78%, #425953 78%);
+  border-radius: 0 0 0.25rem 0.25rem;
+  z-index: -1;
+}
+
+.leitor-cabo {
+  position: absolute;
+  left: -3.25rem;
+  top: -1.4rem;
+  width: 3.4rem;
+  height: 4.5rem;
+  pointer-events: none;
+  z-index: -1;
+}
+
+.leitor-topo {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  padding: 0.1rem 0;
+}
+
+.leitor-marca {
+  color: #6d8177;
+  font: 800 0.55rem/1 var(--sans);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.leitor-led {
+  flex: none;
+  width: 0.34rem;
+  height: 0.34rem;
+  background: #baa775;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.25);
+}
+
+.leitor-led.ok {
+  background: #7fc98a;
+  box-shadow: 0 0 0.35rem rgba(127, 201, 138, 0.9);
+}
+
+.leitor-led.fail,
+.leitor-led.esgotada {
+  background: #d5654a;
+  box-shadow: 0 0 0.35rem rgba(213, 101, 74, 0.9);
+}
+
+/* Berço moldado para apoiar o dedo. O próprio sensor é o botão de leitura. */
+.leitor-berco {
+  display: grid;
+  justify-items: center;
+  gap: 0.35rem;
+  padding: 0.5rem 0.2rem 0.35rem;
+  background: #b2bdaa;
+  border-radius: 1.4rem 1.4rem 0.65rem 0.65rem;
+  box-shadow: inset 0.15rem 0.2rem 0 #8d9e90, 0 0.12rem 0 #f4efda;
+}
+
+.leitor-guia {
+  color: #506c5e;
+  font: 700 0.45rem/1.2 var(--sans);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.vidro {
+  display: grid;
+  place-items: center;
+  justify-self: center;
+  width: calc(3.1 * var(--cm));
+  height: calc(3.7 * var(--cm));
+  min-width: 44px;
+  min-height: 48px;
+  padding: 0;
+  color: #8aaa86;
+  background: linear-gradient(135deg, #345748 0 22%, #1b3a2e 22% 80%, #244738 80%);
+  border: 0.22rem solid #526e60;
+  border-radius: 0.75rem 0.75rem 0.45rem 0.45rem;
+  box-shadow:
+    inset 0.13rem 0.2rem 0 #112d24,
+    0 0.12rem 0 #dae1c8;
+  cursor: pointer;
+  transition: filter 0.12s, transform 0.12s;
+}
+
+.vidro:hover:not(:disabled) {
+  filter: brightness(1.25);
+}
+
+.vidro:active:not(:disabled) {
+  transform: translateY(0.1rem);
+}
+
+.vidro:disabled {
+  cursor: default;
+}
+
+.vidro svg {
+  width: 78%;
+  height: 78%;
+}
+
+.vidro.ok {
+  color: #8fe0a4;
+  border-color: #659577;
+}
+
+.vidro.fail,
+.vidro.esgotada {
+  color: #e2836c;
+  border-color: #9f7761;
+}
+
+/* O estado aparece num visor do aparelho, com a mesma luz da tela do
+   terminal. */
+.leitor-visor {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.3rem;
+  /* duas linhas sempre: trocar a frase não pode mudar o tamanho do aparelho */
+  min-height: 2.5rem;
+  padding: 0.3rem;
+  color: #2d493a;
+  background: #b8c8a0;
+  border: 0.15rem solid #96a489;
+  border-radius: 0.25rem;
+  box-shadow: inset 0.08rem 0.1rem 0 #a8b994, 0 1px 0 #f4efda;
+}
+
+.leitor-visor b {
+  font: 700 0.62rem/1.25 var(--mono);
+}
+
+.leitor-visor small {
+  flex: none;
+  color: #3f604a;
+  font: 0.62rem/1.3 var(--mono);
+}
+
+.leitor-base {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.2rem;
+  padding: 0.1rem 0.15rem;
+  color: #77877b;
+  font: 700 0.4rem/1 var(--sans);
+  letter-spacing: 0.07em;
+}
+
+/* Os pertences: cada um no tamanho do objeto real. O celular que sai do bolso
+   é o mesmo aparelho que serve de documento, então tem a mesma medida. */
+.pertence svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.p-celular .pertence {
+  width: calc(7.2 * var(--cm));
+}
+
+.p-chaves .pertence {
+  width: calc(11 * var(--cm));
+}
+
+/* --------------------------------------------- comprovante e listagem ---- */
+
+.comprovante {
+  width: calc(8.5 * var(--cm));
+  display: grid;
+  gap: 0.3rem;
+  padding: 0.5rem;
+  background: #fbf6e6;
+  border: 1px solid var(--paper-edge);
+  font: 0.72rem/1.35 var(--mono);
+}
+
+.comprovante header {
+  display: grid;
+  gap: 0.1rem;
+  padding-bottom: 0.25rem;
+  border-bottom: 1px dashed var(--paper-line);
+}
+
+.comprovante header strong {
+  font: 700 0.74rem/1.2 var(--mono);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.comprovante header span {
+  color: #7c745c;
+  font-size: 0.62rem;
+}
+
+.cp-nome {
+  margin: 0;
+  font: 700 0.8rem/1.25 var(--mono);
+}
+
+.cp-linha {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.4rem;
+  color: #6f6752;
+}
+
+.cp-carimbo {
+  justify-self: start;
+  padding: 0.1rem 0.4rem;
+  color: #5b8a4a;
+  border: 0.12rem solid #5b8a4a;
+  border-radius: 0.1rem;
+  font: 700 0.66rem/1.3 var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  transform: rotate(-4deg);
+  opacity: 0.75;
+}
+
+/* Uma folha solta, anexa ao caderno. */
+.folha {
+  width: calc(13 * var(--cm));
+  min-height: calc(11 * var(--cm));
+  display: grid;
+  align-content: start;
+  gap: 0.4rem;
+  padding: 0.7rem 0.75rem;
+  background: #f7f1df;
+  border: 1px solid var(--paper-edge);
+}
+
+.folha > header {
+  display: grid;
+  gap: 0.1rem;
+  padding-bottom: 0.3rem;
+  border-bottom: 1px solid var(--paper-line);
+}
+
+.folha strong {
+  font: 700 0.78rem/1.2 var(--mono);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.folha > header span {
+  color: #7c745c;
+  font: 0.62rem/1.2 var(--mono);
+  text-transform: uppercase;
+}
+
+.folha ol {
+  margin: 0;
+  padding-left: 1.4rem;
+  font: 0.74rem/1.6 var(--mono);
+}
+
+.folha li .linha {
+  display: inline-block;
+  width: auto;
+}
+
+.folha li .visto {
+  margin-left: 0.3rem;
+}
+
+.folha li.achado {
+  background: #f2e6bd;
+}
+
+/* -------------------------------------------------------------- manual --- */
+
+/* O manual é um livro de bolso: lombada à esquerda, uma seção por página. */
+.livro {
+  position: relative;
+  width: calc(13 * var(--cm));
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  padding: 0.6rem 0.7rem 0.5rem 1.1rem;
+  background: #f3ecd8;
+  border: 1px solid #cbbd95;
+  border-radius: 0.1rem 0.25rem 0.25rem 0.1rem;
+  box-shadow: inset -0.35rem 0 0.5rem rgba(120, 96, 52, 0.12);
+}
+
+.livro-lombada {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 0.55rem;
+  background: var(--frame);
+  border-right: 1px solid #6f451b;
+  border-radius: 0.1rem 0 0 0.1rem;
+}
+
+/* Todas as páginas ocupam a mesma célula: o livro fica com a altura da página
+   mais longa, e virar não muda o tamanho dele. */
+.livro-pilha {
+  display: grid;
+}
+
+.livro-pilha > * {
+  grid-area: 1 / 1;
+}
+
+/* Cada página entra virando pela lombada. */
+.livro-pagina {
+  visibility: hidden;
+  transform-origin: left center;
+}
+
+.livro-pagina.aberta {
+  visibility: visible;
+  animation: virar 260ms ease-out;
+}
+
+@keyframes virar {
+  from {
+    opacity: 0.2;
+    transform: perspective(40rem) rotateY(-24deg);
+  }
+}
+
+.livro-pagina h3 {
+  margin: 0 0 0.4rem;
+  font: 700 0.76rem/1.2 var(--mono);
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+}
+
+.livro-pagina ul {
+  margin: 0;
+  padding-left: 0.95rem;
+  font: 0.82rem/1.4 var(--sans);
+}
+
+.livro-pagina li {
+  margin-bottom: 0.3rem;
+}
+
+.livro-pe {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+  padding-top: 0.35rem;
+  border-top: 1px solid #d9cba7;
+  color: #7c745c;
+  font: 0.68rem/1 var(--mono);
+}
+
+/* ------------------------------------------------------ a régua de ações -- */
+
+/* Numa carteira larga, o passo da vez fica ao lado das saídas; apertada, ele
+   sobe para a linha de cima em vez de virar uma coluna de uma palavra. */
+.mesa-acoes {
+  display: grid;
+  grid-template-columns: minmax(20ch, 1fr) auto;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.5rem 0.65rem;
+  background: #526c70;
+  border-top: 0.12rem solid #829897;
+  border-bottom: 0.2rem solid #3c5259;
+  border-radius: 0.25rem;
+}
+
+.passo {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  margin: 0;
+  color: #fdf6e4;
+  font: 0.85rem/1.35 var(--sans);
+}
+
+.passo b {
+  color: var(--yellow);
+  font: 700 0.64rem/1.2 var(--mono);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.saidas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+
+/* As saídas da mesa são as teclas grandes da régua: uma cor por saída, texto
+   grande, e a mesma aresta que afunda quando é apertada. */
+.saida {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 0.7rem 0.5rem;
+  color: #fbf6e8;
+  background: var(--saida, #7a5530);
+  border: 0;
+  border-radius: 0.12rem;
+  box-shadow: 0 0.2rem 0 var(--saida-edge, #55391c);
+  font: 800 0.82rem/1.15 var(--sans);
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: transform 0.06s ease, box-shadow 0.06s ease;
+}
+
+.saida:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+
+.saida:active:not(:disabled) {
+  transform: translateY(0.16rem);
+  box-shadow: 0 0.04rem 0 var(--saida-edge, #55391c);
+}
+
+.saida:disabled {
+  color: rgba(251, 246, 232, 0.55);
+  filter: saturate(0.4) brightness(0.8);
+  cursor: default;
+}
+
+.saida kbd {
+  padding: 0.12rem 0.32rem;
+  color: #2c1e0c;
+  background: var(--key-yellow);
+  border-radius: 0.1rem;
+  box-shadow: 0 0.1rem 0 var(--key-yellow-edge);
+  font: 800 0.72rem/1.2 var(--sans);
+}
+
+.saida.perguntar {
+  --saida: var(--key-blue);
+  --saida-edge: var(--key-blue-edge);
+}
+
+.saida.juiz {
+  --saida: var(--key-plum);
+  --saida-edge: var(--key-plum-edge);
+}
+
+.saida.suspender {
+  --saida: var(--key-clay);
+  --saida-edge: var(--key-clay-edge);
+}
+
+.mesa-nota {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: rgba(253, 246, 228, 0.6);
+  font: 0.64rem/1.3 var(--mono);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+/* ----------------------------------------------------------------- camadas */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  display: grid;
+  place-items: center;
+  padding: 1rem;
+  color: #f6f1e1;
+  background: rgba(38, 28, 14, 0.82);
+  backdrop-filter: blur(0.25rem);
+  animation: fade 0.18s ease;
+}
+
+@keyframes fade {
+  from {
+    opacity: 0;
+  }
+}
+
+/* As janelas de início e fim são o próprio quadro-negro. */
+.modal {
+  width: min(42rem, 100%);
+  max-height: calc(100dvh - 2rem);
+  overflow: auto;
+  padding: 1.5rem;
+  background:
+    radial-gradient(70% 45% at 20% 0%, rgba(255, 255, 255, 0.06), transparent 70%),
+    linear-gradient(var(--board-lit), var(--board) 65%);
+  border: 0.45rem solid var(--frame);
+  border-radius: var(--r);
+  box-shadow: 0 1.1rem 3rem rgba(0, 0, 0, 0.5), inset 0 0 2rem rgba(0, 0, 0, 0.35);
+}
+
+.modal-kicker {
+  color: #e8d79a;
+  font: 0.65rem/1 var(--mono);
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+}
+
+.modal h2 {
+  margin: 0.5rem 0 0.7rem;
+  color: #fbfdf9;
+  font: 400 2.3rem/1.1 var(--chalk);
+  text-shadow: 0 0 0.5rem rgba(234, 241, 230, 0.25);
+}
+
+.modal p {
+  margin: 0 0 0.7rem;
+  color: rgba(234, 241, 230, 0.86);
+  font: 0.95rem/1.55 var(--serif);
+}
+
+.intro {
+  padding: 0.5rem 0 0.5rem 0.85rem;
+  border-left: 0.22rem solid var(--yellow);
+  color: #fff8e6 !important;
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.45rem;
+  margin: 1rem 0;
+}
+
+.stat {
+  padding: 0.6rem;
+  background: rgba(255, 255, 255, 0.07);
+  border-radius: 0.15rem;
+}
+
+.stat span {
+  display: block;
+  color: #b9cdbe;
+  font: 0.55rem/1 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.stat strong {
+  display: block;
+  margin-top: 0.35rem;
+  color: #fbfdf9;
+  font: 800 1.2rem/1 var(--mono);
+}
+
+.hint {
+  color: rgba(234, 241, 230, 0.6) !important;
+  font: 0.68rem/1.5 var(--mono) !important;
+}
+
+/* ------------------------------------------- a abertura: a urna e o papel */
+
+.urna-cena {
+  position: relative;
+  /* A fita é posicionada em unidades da própria cena (`cqw`), então ela fica
+     colada na fenda da impressora em qualquer largura de tela. */
+  container-type: inline-size;
+  width: 100%;
+  aspect-ratio: 400 / 318;
+  margin: 0.2rem 0 0.9rem;
+}
+
+.urna {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+/* A fita sai pela fenda e desce pela lateral esquerda: a mesma matriz da face
+   esquerda da caixa, para o papel pertencer ao mesmo desenho. */
+.fita {
+  position: absolute;
+  left: 25.6cqw;
+  top: 25cqw;
+  width: 22cqw;
+  transform: matrix(0.866, 0.5, 0, 1, 0, 0);
+  transform-origin: 0 0;
+}
+
+/* O papel não desliza: ele é revelado de cima para baixo, como sai de uma
+   impressora térmica. O estado normal é o papel inteiro à mostra, então
+   `prefers-reduced-motion` desliga a impressão sem esconder nada.
+
+   Tudo aqui é proporcional à cena — o corpo em `cqw`, o resto em `em` — para
+   a fita quebrar as linhas do mesmo jeito no desktop e no celular. */
+.zeresima {
+  padding: 0.7em 0.9em 0.9em;
+  color: #4a4636;
+  background: var(--paper);
+  border: 1px solid var(--paper-edge);
+  box-shadow: 0.15rem 0.3rem 0.5rem rgba(0, 0, 0, 0.4);
+  font: clamp(6px, 1.55cqw, 9.5px) / 1.45 var(--mono);
+  animation: imprimir 2.6s steps(13) both;
+}
+
+@keyframes imprimir {
+  from {
+    clip-path: inset(0 0 100% 0);
+  }
+  to {
+    clip-path: inset(0 0 0 0);
+  }
+}
+
+/* O papel é claro dentro de um quadro-negro: sem isto, as regras de texto do
+   modal pintariam a impressão de branco. */
+.zeresima p {
+  margin: 0;
+  color: inherit;
+  font: inherit;
+}
+
+.zeresima h3 {
+  margin: 0 0 0.5em;
+  font: 700 1.05em/1.3 var(--mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.zeresima .zr-head {
+  font-size: 0.92em;
+  letter-spacing: 0.05em;
+}
+
+.zr-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.6em;
+}
+
+.zr-row b {
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.zr-rule {
+  margin: 0.5em 0;
+  border-top: 1px dashed var(--paper-line);
+}
+
+.zeresima .zr-sign {
+  margin: 1.4em 0 0;
+  padding-top: 0.2em;
+  border-top: 1px solid var(--paper-line);
+  font-size: 0.87em;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.zeresima .zr-foot {
+  margin: 0.6em 0 0;
+  color: #6d6752;
+  font-size: 0.87em;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+/* Só a urna e um botão: a abertura é um gesto, não uma tela de leitura. */
+.modal.opening {
+  width: min(38rem, 100%);
+  display: grid;
+  justify-items: center;
+  padding: 1.2rem;
+}
+
+.opening-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.primary {
+  padding: 0.75rem 1.3rem 0.8rem;
+  color: #3a2a08;
+  background: var(--key-yellow);
+  border: 0;
+  border-radius: 0.14rem;
+  box-shadow: 0 0.26rem 0 var(--key-yellow-edge);
+  cursor: pointer;
+  font: 800 1.05rem/1.1 var(--sans);
+  letter-spacing: 0.01em;
+  transition: transform 0.06s ease, box-shadow 0.06s ease;
+}
+
+.primary:hover:not(:disabled) {
+  filter: brightness(1.06);
+}
+
+.primary:active:not(:disabled) {
+  transform: translateY(0.2rem);
+  box-shadow: 0 0.06rem 0 var(--key-yellow-edge);
+}
+
+.primary:disabled {
+  color: rgba(58, 42, 8, 0.55);
+  filter: saturate(0.5) brightness(0.92);
+  cursor: default;
+}
+
+/* O retorno de cada decisão vem em papel carimbado. */
+.feedback {
+  width: min(34rem, 100%);
+  max-height: calc(100dvh - 2rem);
+  overflow: auto;
+  padding: 1.4rem;
+  color: var(--ink);
+  background:
+    radial-gradient(90% 50% at 50% 0%, rgba(255, 255, 255, 0.6), transparent 70%),
+    var(--paper);
+  border: 1px solid #b8a77f;
+  box-shadow: 0.6rem 0.75rem rgba(0, 0, 0, 0.3);
+  transform: rotate(-0.4deg);
+}
+
+.stamp {
+  display: inline-block;
+  margin-bottom: 0.6rem;
+  padding: 0.35rem 0.55rem;
+  border: 0.18rem solid currentColor;
+  font: 900 0.95rem/1 var(--mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  transform: rotate(-3deg);
+}
+
+.stamp.good {
+  color: #2f6149;
+}
+
+.stamp.bad {
+  color: var(--red);
+}
+
+.feedback h2 {
+  margin: 0 0 0.4rem;
+  font: 800 1.4rem/1.15 var(--serif);
+}
+
+.feedback p {
+  margin: 0;
+  color: #3f453e;
+  font: 0.95rem/1.5 var(--serif);
+}
+
+.feedback-meta {
+  margin: 0.8rem 0;
+  padding: 0.5rem 0;
+  border-block: 1px solid #b9ac8b;
+  font: 0.65rem/1.5 var(--mono);
+  text-transform: uppercase;
+}
+
+.toast {
+  position: fixed;
+  z-index: 15;
+  left: 50%;
+  bottom: 1.2rem;
+  width: min(28rem, calc(100% - 2rem));
+  padding: 0.6rem 0.8rem;
+  color: #fdf7e6;
+  background: #3f2c16;
+  border-left: 0.25rem solid var(--yellow);
+  box-shadow: 0 0.5rem 1.6rem rgba(0, 0, 0, 0.4);
+  font: 0.7rem/1.4 var(--mono);
+  transform: translate(-50%, 160%);
+  transition: transform 0.25s ease;
+}
+
+.toast.show {
+  transform: translate(-50%, 0);
+}
+
+@media (max-width: 1240px) {
+  .mesa-acoes {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* --------------------------------------------------------------- adaptação */
+
+/* Telas estreitas: a sala vira uma coluna e a rolagem é liberada. */
+@media (max-width: 900px), (max-height: 460px) {
+  html {
+    font-size: 14px;
+  }
+
+  body,
+  #root {
+    height: auto;
+    min-height: 100dvh;
+    overflow: visible;
+  }
+
+  .app {
+    height: auto;
+    min-height: 100dvh;
+    grid-template-rows: auto auto;
+  }
+
+  .board {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .person {
+    grid-template-rows: auto auto;
+  }
+
+  .room {
+    height: 19rem;
+  }
+
+  /* Sem espaço para espalhar, a mesa vira uma pilha em coluna: as peças
+     perdem a posição solta e o dedo rola a página. */
+  .mesa {
+    grid-template-rows: auto auto;
+  }
+
+  .mesa-superficie {
+    container-type: normal;
+    --cm: 1.32rem;
+    display: grid;
+    justify-items: center;
+    gap: 1.4rem;
+    padding: 0.25rem 0;
+    overflow: visible;
+  }
+
+  .piece {
+    position: static;
+    max-width: 100%;
+    filter: drop-shadow(0.1rem 0.2rem 0.16rem #493b2840);
+    cursor: default;
+  }
+
+  .piece.vez::after {
+    inset: -0.2rem;
+  }
+
+  .livro {
+    min-height: 0;
+  }
+}
+
+@media (max-width: 900px) {
+  .top {
+    grid-template-columns: minmax(0, 1fr) repeat(2, minmax(0, 0.6fr));
+    row-gap: 0.5rem;
+  }
+
+  .top .progress {
+    grid-column: 1 / -1;
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .mesa-acoes {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .book {
+    width: min(100%, 25rem);
+    overflow-x: auto;
+  }
+
+  .carteira-tampo {
+    padding: 1.15rem 0.45rem 1.4rem;
+  }
+
+  .room-window {
+    width: 32%;
+    left: 36%;
+    height: 76%;
+    bottom: 15%;
+  }
+
+  /* Deitada, a sala fica larga e baixa: o ventilador encolhe em relação à
+     largura e o papel sai de baixo dele. */
+  .room-fan {
+    width: 14%;
+    max-height: 36%;
+  }
+
+  .tape-note {
+    left: 4%;
+    top: 9%;
+    width: 20%;
+    font-size: 0.55rem;
+  }
+}
+
+@media (max-width: 520px) {
+  .top {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .brand {
+    grid-column: 1 / -1;
+  }
+
+  .metric {
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .stats {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .modal h2 {
+    font-size: 1.8rem;
+  }
+
+  .room-window {
+    width: 46%;
+    left: 32%;
+    height: 70%;
+  }
+
+  .room-fan {
+    width: 20%;
+  }
+
+  .tape-note {
+    left: 5%;
+    top: 4%;
+    width: 46%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}
+/* Folha A4 e cantos de papel. O cabeçalho continua sendo a pega para mover. */
+.book { position: relative; width: min(calc(24 * var(--cm)), 69cqh); aspect-ratio: 210 / 297; min-height: 0; display: block; padding: 0; perspective: 1200px; background: #e4dbc3; }
+.book-sheet { position: relative; width: 100%; height: 100%; display: grid; grid-template-rows: auto auto 1fr auto auto; gap: .5rem; padding: 1.2rem .8rem .7rem; background: linear-gradient(95deg, #e8dfc9, #faf5e3 5%, #f6f0dc 94%, #e8dfc9); transform-origin: left center; backface-visibility: hidden; }
+.book-kicker { font: .45rem/1.4 var(--mono); color: #817b66; letter-spacing: .08em; }
+.book-head { display: grid; gap: .3rem; padding-bottom: .65rem; }
+.book table { height: 100%; font-size: .7rem; }
+.book th { font-size: .48rem; letter-spacing: 0; }
+.book td { padding: .35rem .15rem; }
+.book .linha { font-size: inherit; }
+.book col.c-birth { width: 11.5ch; }
+.book td:nth-child(3), .book th:nth-child(3) { white-space: nowrap; overflow-wrap: normal; }
+.book col.c-sign { width: 23%; }
+.book-pages { justify-content: center; padding-top: .6rem; }
+.book-gesture-hint { text-align: center; font: .5rem/1.4 var(--mono); color: #938b71; }
+.page-corner { position: absolute; bottom: 0; width: 2.5rem; height: 2.5rem; border: 0; border-radius: 0; padding: 0; background: linear-gradient(135deg, transparent 49%, #cec3a5 50%, #fffbed 54%, #e1d7bb); box-shadow: none; transition: width .18s, height .18s; }
+.page-corner.next { right: 0; }
+.page-corner.previous { left: 0; transform: scaleX(-1); }
+.page-corner:hover:not(:disabled) { width: 3.1rem; height: 3.1rem; filter: brightness(1.03); }
+.page-corner:focus-visible { outline: 2px solid #54796e; outline-offset: -3px; }
+.page-corner:disabled { visibility: hidden; }
+.book-sheet.turning { position: absolute; inset: 0; z-index: 2; pointer-events: none; transform-origin: center top; animation: page-forward .85s cubic-bezier(.3,.05,.25,1) both; }
+.book-sheet.backward { animation-name: page-backward; }
+@keyframes page-forward {
+  0% { transform: rotateX(0); box-shadow: 0 0 0 #493b2800; }
+  35% { box-shadow: 0 1.5rem 2rem #493b2833; filter: brightness(.98); }
+  100% { transform: rotateX(165deg); box-shadow: 0 2rem 3rem #493b2800; filter: brightness(.86); }
+}
+@keyframes page-backward {
+  from { transform: rotateX(165deg); filter: brightness(.86); }
+  to { transform: rotateX(0); filter: brightness(1); }
+}
+
+/* UV 127: mesma família de carcaças do terminal e do leitor. */
+.urna-cena { aspect-ratio: 1 / 1.04; }
+.urn-device { position: absolute; top: 3%; left: 8%; width: 84%; height: auto; font-family: var(--mono); }
+.urn-body { position: relative; z-index: 2; padding: 4% 5% 3%; background: #e8e5cf; border: 2px solid #f7f2da; border-radius: 9% 9% 6% 6%; box-shadow: inset 0 -12px #aeb6a1, 0 12px 0 #7f9186, 0 18px 25px #0005; }
+.urn-handle { position: absolute; top: -5%; left: 31%; width: 38%; height: 13%; border: 8px solid #819187; border-radius: 20px; background: #263c33; }
+.urn-label { display: flex; justify-content: space-between; align-items: center; color: #617d73; font-size: 2.4cqw; margin-bottom: 3%; letter-spacing: .08em; }
+.urn-label em { background: #678177; color: #eeefd9; padding: 0 .3em; font-style: normal; }
+.urn-label > span { font-size: 1.4cqw; }
+.urn-panel { display: grid; grid-template-columns: 1.6fr 1fr; gap: 4%; }
+.urn-screen { display: flex; flex-direction: column; align-items: center; justify-content: space-between; min-height: 34cqw; padding: 3%; background: repeating-linear-gradient(0deg, transparent 0 3px, #b5dfaa08 3px 4px), #163229; color: #add1a7; border: 7px solid #84968b; border-radius: 10px; box-shadow: inset 0 0 0 3px #0d251d; font-size: 1.6cqw; }
+.urn-screen-top { display: flex; justify-content: space-between; width: 100%; border-bottom: 1px solid #85aa7940; padding-bottom: 5%; }
+.urn-screen strong { font: 5.5cqw/1 var(--mono); letter-spacing: .12em; color: #d1ecc2; }
+.urn-screen small { font-size: 1.1cqw; }
+.urn-progress { width: 85%; height: .7cqw; background: #a9cfa21c; }
+.urn-progress i { display: block; height: 100%; width: 0; background: #b5d7a5; }
+.is-printing .urn-progress i { animation: urn-progress 3.6s steps(24) forwards; }
+@keyframes urn-progress { to { width: 100%; } }
+.urn-keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1cqw; padding: 1.3cqw; background: #a7b29e; border-radius: 10px; }
+.urn-keypad span { display: grid; place-items: center; color: #333a31; background: #f0efdf; box-shadow: 0 .5cqw #7c8b7b; border-radius: .6cqw; font: bold 3cqw/1.3 var(--mono); }
+.urn-keypad .urn-zero { grid-column: 2; }
+.urn-keypad .urn-correct, .urn-keypad .urn-confirm { grid-column: 1 / -1; font-size: 1.5cqw; color: #fff4df; padding: .6cqw; background: #ba653e; }
+.urn-keypad .urn-confirm { background: #488259; }
+.urn-printer-label { text-align: center; font-size: 1.3cqw; color: #6c7d70; margin: 3% 0 1%; letter-spacing: .1em; }
+.urn-printer-label span { color: #85a46c; }
+.is-printing .urn-printer-label span { animation: printer-led .3s steps(2) infinite; }
+@keyframes printer-led { 50% { opacity: .25; } }
+.urn-slot { width: 49%; height: 1.5cqw; margin: auto; border-radius: 8px; background: #142b24; box-shadow: 0 -3px #8f9e8c, 0 2px #f9f4df; }
+.urn-bottom { display: flex; justify-content: space-between; padding-top: 4%; font-size: 1.2cqw; color: #738477; }
+.urn-feet { display: flex; justify-content: space-between; padding: 0 10%; }
+.urn-feet i { width: 15%; height: 3cqw; background: #415c50; border-radius: 0 0 5px 5px; }
+.fita { left: 32%; top: 48.4cqw; width: 36%; transform: none; overflow: hidden; padding: 0 1% 2%; z-index: 3; }
+.zeresima { font-size: 1.65cqw; padding: 1em 1.2em; border-top: 0; background: linear-gradient(#c4c2ae, #f8f4e4 14%, #fffbed 90%, #e9e1ca); animation: paper-feed 3.6s steps(24) both; transform-origin: top; }
+@keyframes paper-feed { from { transform: translateY(-101%); } to { transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .book-sheet.turning { animation-duration: .01s; } .zeresima, .is-printing .urn-progress i { animation-duration: .01s; } .is-printing .urn-printer-label span { animation: none; } }
+.urn-slot { position: relative; }
+.urn-slot .fita { left: 2%; top: 40%; width: 96%; padding: 0 1% 2%; }
+
+@media (max-width: 900px) { .book { width: min(100%, 27rem); } }
+/* Corredor da escola, com luz dos basculantes e personagens ilustrados. */
+.corredor-cena { height: 5.6rem; border-radius: .2rem; background: #e6ddc5; box-shadow: inset 0 0 0 1px #425b5d40; }
+.corredor-cena .parede { inset: 0 0 22%; background: linear-gradient(90deg, #d8d0b9, #efe6d0 50%, #e4ddc9); border-bottom: .12rem solid #728c88; }
+.corredor-cena .parede::after { content: ''; position: absolute; inset: 60% 0 0; background: #a6b9b2; border-top: .1rem solid #cad3c0; }
+.corredor-cena .piso { inset: 78% 0 0; background: repeating-linear-gradient(0deg, transparent 0 .65rem, #8d958331 .66rem .7rem), repeating-linear-gradient(112deg, #d0cbb7 0 3rem, #a9b0a0 3.02rem 3.08rem, #d0cbb7 3.1rem 6rem); }
+.fila-porta { left: .35rem; bottom: 20%; width: 2.2rem; height: 4.65rem; }
+.corredor-janelas { position: absolute; top: .45rem; right: 5%; display: flex; gap: 1.4rem; }
+.corredor-janelas i { display: block; width: 2.6rem; height: 1.6rem; border: .13rem solid #879f99; background: linear-gradient(125deg, #c3d9d6 25%, #e2e9db 25% 37%, #bdd5d0 37% 70%, #e2e9db 70% 77%, #bdd5d0 77%); box-shadow: 0 .15rem #f4ead2, inset 0 .6rem #ffffff20; }
+.corredor-aviso { position: absolute; top: .75rem; left: 3.1rem; padding: .2rem; background: #f8efd7; border-top: .15rem solid #c2b58d; color: #8b856f; font: .36rem/1.3 var(--mono); transform: rotate(-3deg); }
+.corredor { left: 3rem; right: 1.8rem; bottom: .15rem; gap: .3rem; overflow-x: auto; overflow-y: hidden; scrollbar-width: thin; scrollbar-color: #899b8b transparent; padding-top: .25rem; }
+.na-fila { width: 1.9rem; transform: translateY(calc(var(--i, 0) * -.018rem)) scale(max(.76, calc(1 - var(--i, 0) * .022))); }
+.na-fila svg { fill: none; filter: drop-shadow(.04rem .03rem 0 #34433516); }
+.na-fila.preferencia svg { fill: none; }
+.na-fila.anonimo svg { fill: none; opacity: .55; filter: saturate(.6); }
+.na-fila button:not(:disabled):hover svg { fill: none; filter: brightness(1.12) drop-shadow(0 0 .15rem #fff2b4); transform: translateY(-.08rem); }
+.na-fila button:focus-visible { outline: 2px solid #e0b34a; outline-offset: -2px; border-radius: .25rem; }
+.na-fila.vez button::after { position: absolute; bottom: .03rem; left: 10%; width: 80%; }
+/* Faixa panorâmica: preserva a ilustração sem roubar altura da mesa. */
+.corredor-cena { height: 3.2rem; }
+.fila-porta { width: 1.45rem; height: 2.65rem; left: .3rem; }
+.corredor-janelas { top: .25rem; gap: 2rem; }
+.corredor-janelas i { width: 2.4rem; height: .9rem; border-width: .1rem; }
+.corredor-aviso { top: .3rem; left: 2rem; font-size: .3rem; padding: .12rem; }
+.corredor { left: 2rem; bottom: .08rem; gap: .5rem; padding-top: .12rem; }
+.na-fila { width: 1.25rem; }
+.top { padding-top: .35rem; padding-bottom: .35rem; }
+
+/* Conversa: duas vozes, com balões e tipografia de leitura. */
+.person-card { padding: .6rem; background: #dfe4d7; border-top: .15rem solid #85968a; box-shadow: 0 -.15rem .5rem #364e3f20; }
+.person-card h2, .person-card .speech { font-family: var(--sans); }
+.conversa { gap: .65rem; }
+.dito { max-height: min(12rem, 25dvh); padding: .15rem .45rem .45rem; gap: .7rem; scrollbar-width: thin; scrollbar-color: #a1b2a2 transparent; overscroll-behavior: contain; }
+.troca { gap: .7rem; }
+.chat-bubble { position: relative; justify-self: start; width: fit-content; max-width: 93%; padding: .6rem .7rem; border: 1px solid #d2d7c7; border-radius: .85rem .85rem .85rem .2rem; color: #334039; background: #fffdf1; box-shadow: 0 .12rem .18rem #52645412; font: .86rem/1.45 var(--sans); }
+.chat-bubble::after { content: ''; position: absolute; left: -.32rem; bottom: .15rem; width: .55rem; height: .55rem; background: inherit; border-left: 1px solid #d2d7c7; clip-path: polygon(0 100%, 100% 0, 100% 100%); }
+.chat-speaker { display: block; margin-bottom: .2rem; color: #83917b; font: 700 .58rem/1.2 var(--sans); letter-spacing: .025em; }
+.chat-bubble p { margin: 0; overflow-wrap: break-word; }
+.chat-bubble.own { justify-self: end; color: #f5f6e9; background: #526f61; border-color: #486657; border-radius: .85rem .85rem .2rem .85rem; }
+.chat-bubble.own::after { left: auto; right: -.32rem; transform: scaleX(-1); border-color: #486657; }
+.chat-bubble.own .chat-speaker { color: #d2dfc6; }
+.perguntas { gap: .35rem; max-height: 6.5rem; padding: .45rem .1rem .15rem; border-top: 1px solid #b9c6b5; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #a1b2a2 transparent; }
+.chat-prompt { color: #73816f; font: .62rem/1.2 var(--sans); padding: 0 .25rem .1rem; }
+.pergunta { display: flex; align-items: center; justify-content: space-between; gap: .45rem; padding: .5rem .65rem; border: 1px solid #b3c3af; border-radius: .7rem .7rem .25rem .7rem; background: #eef3e7; color: #425b4b; box-shadow: none; font: 600 .75rem/1.3 var(--sans); }
+.pergunta:hover { background: #fffdf1; border-color: #7e9a80; }
+.pergunta:active { box-shadow: none; }
+.chat-send { flex: none; color: #7b957c; font-size: .95rem; }
+@media (max-width: 900px), (max-height: 460px) { .dito { max-height: 15rem; } .perguntas { max-height: 9rem; } }
+
+/* Cartões: foto e nome em cima, números em uma faixa de largura integral. */
+.doc-identidade, .doc-habilitacao, .doc-profissional { width: max(17rem, calc(14 * var(--cm))); }
+.doc header { font: 700 .68rem/1.25 var(--sans); letter-spacing: .025em; gap: .7rem; padding-top: .4rem; padding-bottom: .4rem; }
+.doc header > span { min-width: 0; }
+.doc header > b { flex: none; white-space: nowrap; }
+.doc footer { display: grid; gap: .2rem; font: .57rem/1.35 var(--sans); letter-spacing: .015em; padding-top: .4rem; padding-bottom: .4rem; }
+.doc-card-body { display: grid; grid-template-columns: auto minmax(0, 1fr); align-items: start; gap: .75rem; padding: .1rem 0 .5rem; }
+.doc-card-body .doc-photo { width: 3rem; }
+.doc-name-block { min-width: 0; display: grid; align-content: start; gap: .6rem; padding-top: .2rem; }
+.doc-name-block .rg-digital { width: 3rem; height: .75rem; opacity: .65; }
+.doc-field { min-width: 0; }
+.doc-field small { margin-bottom: .16rem; font: .56rem/1.2 var(--sans); letter-spacing: .045em; }
+.doc-field strong { font-size: .82rem; line-height: 1.3; }
+.doc-name strong { overflow-wrap: normal; word-break: normal; }
+.doc-details { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: .7rem; padding: .45rem 0 .5rem; border-top: 1px solid #cbbd954a; }
+.doc-numeric strong { white-space: nowrap; overflow-wrap: normal; font-variant-numeric: tabular-nums; letter-spacing: 0; }
+.doc-details .doc-numeric strong { font-size: .8rem; }
+.doc-code { margin-top: .15rem; }
+.doc-code small, .doc-code b { white-space: nowrap; }
+.doc-validation { width: fit-content; margin: 0 0 .4rem auto; padding: .12rem .35rem; border: 1px solid #8d504070; border-radius: .15rem; color: #8d5040; font: 700 .52rem/1.2 var(--sans); text-transform: uppercase; letter-spacing: .04em; transform: rotate(-3deg); }
+.doc-digital { min-width: 9.8rem; }
+.doc-certidao { min-width: 16rem; }
+@media (max-width: 900px), (max-height: 460px) {
+  .doc-identidade, .doc-habilitacao, .doc-profissional { width: min(20rem, calc(100vw - 4rem)); }
+}
+/* A fila ocupa também a antiga linha do título, mantendo a altura da faixa. */
+.fila-metric { align-self: stretch; display: grid; }
+.fila-metric .corredor-cena { height: 4.12rem; }
+.fila-metric .fila-porta { height: 3.4rem; width: 1.85rem; }
+.fila-metric .corredor { left: 2.45rem; gap: .55rem; }
+.fila-metric .na-fila { width: 1.55rem; }
+.fila-metric .corredor-aviso { left: 2.45rem; top: .4rem; }
+.fila-metric .corredor-janelas i { height: 1.15rem; }
+
+/* O histórico nunca participa do cálculo da altura do retrato. */
+.person { grid-template-rows: minmax(0, 1fr) minmax(0, 1fr); }
+.person-card { min-height: 0; display: flex; flex-direction: column; gap: .45rem; overflow: hidden; }
+.person-card > h2, .person-card > .speech, .person-card > .preferencia-tag { flex: none; }
+.person-card > .preferencia-tag { align-self: flex-start; margin-bottom: 0; }
+.conversa { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: .5rem; container-type: size; }
+.conversa .dito { flex: 1; min-height: 0; max-height: none; align-content: start; }
+.chat-bubble { max-width: 96%; font-size: .9rem; }
+.chat-choices { position: relative; flex: none; }
+.chat-choices summary { display: flex; align-items: center; justify-content: space-between; gap: .5rem; padding: .65rem .75rem; background: #526f61; color: #f5f6e9; border: 1px solid #486657; border-radius: .65rem; cursor: pointer; font: 600 .8rem/1.3 var(--sans); list-style: none; }
+.chat-choices summary::-webkit-details-marker { display: none; }
+.chat-choices[open] summary > span { transform: rotate(180deg); }
+.chat-choices .perguntas { position: absolute; bottom: calc(100% + .35rem); left: 0; right: 0; z-index: 2; max-height: min(16rem, 34dvh); padding: .4rem; border: 1px solid #b3c3af; border-radius: .75rem; background: #e4ebdd; box-shadow: 0 -.3rem 1rem #344b3630; }
+.chat-choices .pergunta { width: 100%; }
+.conversa .chat-choices .perguntas { max-height: min(16rem, calc(100cqh - 3.5rem)); }
+@media (max-width: 900px), (max-height: 460px) {
+  .person { grid-template-rows: 19rem 24rem; }
+  .chat-choices .perguntas { max-height: 17rem; }
+}
+/* Responder pelo ícone: o menu faz uma ponte contínua até o ponteiro. */
+.chat-reply { position: relative; flex: none; align-self: flex-end; width: 2.5rem; height: 2.5rem; }
+.chat-reply-icon { display: grid; place-items: center; width: 100%; height: 100%; padding: .55rem; border: 1px solid #456554; border-radius: 50% 50% .25rem 50%; color: #f5f6e9; background: #526f61; cursor: pointer; box-shadow: 0 .15rem .2rem #314d3320; }
+.chat-reply-icon svg { width: 100%; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.chat-reply-icon:hover, .chat-reply.is-open .chat-reply-icon { background: #3d5b4c; }
+.chat-reply-icon:disabled { opacity: .4; cursor: default; }
+.chat-reply-menu { position: absolute; right: 0; bottom: 100%; width: 100cqw; padding-bottom: .4rem; z-index: 3; }
+.chat-reply .perguntas { max-height: min(16rem, calc(100cqh - 3.5rem)); padding: .4rem; border: 1px solid #b3c3af; border-radius: .75rem; background: #e4ebdd; box-shadow: 0 -.3rem 1rem #344b3630; }
+.chat-bubble { animation: bubble-arrive .28s cubic-bezier(.2,.7,.3,1) both; transform-origin: left bottom; }
+.chat-bubble.own { transform-origin: right bottom; }
+@keyframes bubble-arrive { from { opacity: 0; transform: translateY(.45rem) scale(.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+.chat-wait { display: flex; gap: .22rem; width: fit-content; padding: .7rem .85rem; border-radius: .85rem .85rem .85rem .2rem; background: #fffdf1; justify-self: start; }
+.chat-wait.own { justify-self: end; background: #526f61; border-radius: .85rem .85rem .2rem .85rem; }
+.chat-wait i { width: .25rem; height: .25rem; border-radius: 50%; background: #8b9d87; animation: conversation-wait .75s ease-in-out infinite alternate; }
+.chat-wait.own i { background: #d2dfc6; }
+.chat-wait i:nth-child(2) { animation-delay: .12s; }
+.chat-wait i:nth-child(3) { animation-delay: .24s; }
+@keyframes conversation-wait { to { opacity: .35; transform: translateY(-.15rem); } }
+
+/* Nova impressão dos cartões. O retrato, seu enquadramento e suas cores são preservados. */
+.doc-identidade, .doc-habilitacao, .doc-profissional {
+  --doc-accent: #3f6c83;
+  --doc-tint: #dde8e5;
+  width: max(18.5rem, calc(14.5 * var(--cm)));
+  padding: .7rem .8rem;
+  border: 1px solid #b8c4b4;
+  border-radius: .65rem;
+  background: repeating-radial-gradient(ellipse at 110% 55%, transparent 0 .55rem, #6d968610 .56rem .6rem, transparent .61rem 1rem), #f4f2e5;
+  box-shadow: inset 0 0 0 .2rem #ffffff60, 0 .1rem 0 #b7bfac;
+}
+.doc-habilitacao { --doc-accent: #697343; --doc-tint: #e5e8cf; background-color: #f6f2df; border-color: #c3c6a4; }
+.doc-profissional { --doc-accent: #6e586c; --doc-tint: #e7dfe5; background-color: #f4f0ec; border-color: #c5bac2; }
+.doc-identidade.velha { --doc-accent: #78816b; --doc-tint: #e5dfcb; background-color: #eee5cc; }
+.doc .doc-heading {
+  position: relative; display: flex; align-items: center; gap: .55rem;
+  margin: -.7rem -.8rem .7rem; padding: .65rem .8rem .6rem;
+  background: var(--doc-accent); color: #fff9e9;
+  border-bottom: .2rem solid #d8c28a; letter-spacing: 0; text-transform: none;
+}
+.doc-emblem { width: 1.9rem; height: 2.25rem; flex: none; color: #e7ddb8; }
+.doc-heading-text { flex: 1; min-width: 0; }
+.doc-heading-text small { display: block; margin-bottom: .22rem; font: 500 .47rem/1.2 var(--sans); letter-spacing: .07em; text-transform: uppercase; color: #f3ebd2; }
+.doc-heading-text > span { display: block; font: 700 .85rem/1.15 var(--sans); text-wrap: balance; }
+.doc .doc-heading > b { padding: .4rem .35rem; border: 1px solid #ffffff55; border-radius: .25rem; background: #ffffff15; color: #fff8e5; font: 700 .62rem/1 var(--sans); white-space: nowrap; }
+.doc-card-body { gap: .8rem; padding: .1rem 0 .65rem; }
+.doc-name-block { padding-top: .05rem; gap: .7rem; }
+.doc-name small { color: var(--doc-accent); font-size: .5rem; letter-spacing: .1em; }
+.doc-name strong { font-size: .98rem; line-height: 1.2; font-weight: 700; color: #29382f; }
+.doc-details { grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: .75rem; padding: .65rem 0; border-top: 1px solid #8b9c8540; }
+.doc-details .doc-field small { color: var(--doc-accent); font-size: .51rem; }
+.doc-details .doc-field strong { font-size: .84rem; font-weight: 650; }
+.doc-identidade .doc-code, .doc-habilitacao .doc-code, .doc-profissional .doc-code { margin: .05rem 0 0; padding: 0 0 0 .65rem; min-height: 2rem; gap: .7rem; background: var(--doc-tint); border: 1px solid #98a58e60; border-radius: .3rem; overflow: hidden; }
+.doc-identidade .doc-code small, .doc-habilitacao .doc-code small, .doc-profissional .doc-code small { font: 600 .57rem/1.2 var(--sans); letter-spacing: .06em; color: var(--doc-accent); }
+.doc-identidade .doc-code b, .doc-habilitacao .doc-code b, .doc-profissional .doc-code b { align-self: stretch; display: grid; place-items: center; padding: .45rem .75rem; background: var(--doc-accent); color: #fff9e7; font-size: 1.15rem; letter-spacing: .17em; }
+.doc-identidade footer, .doc-habilitacao footer, .doc-profissional footer { margin: .65rem -.8rem -.7rem; padding: .45rem .8rem; background: #ffffff35; border-top: 1px solid #98a58e40; color: #737c69; text-transform: none; font: .56rem/1.35 var(--sans); letter-spacing: 0; }
+.doc-validation { color: var(--doc-accent); border-color: #92758c70; margin: -.15rem 0 .45rem auto; }
+/* O celular mantém o retrato e ganha uma hierarquia mais clara nos dados. */
+.doc-digital .fone-tela { background: #f1f4eb; gap: .5rem; }
+.doc-digital .app-barra { font-family: var(--sans); padding-top: .5rem; padding-bottom: .5rem; letter-spacing: .035em; }
+.doc-digital .app-linhas { text-align: left; padding: .45rem .3rem; border-top: 1px solid #bacab64d; gap: .5rem; }
+.doc-digital .doc-code { border: 1px solid #b5c6ab; border-radius: .35rem; background: #e2ecd9; padding: .4rem; }
+.doc-certidao .cert-borda { border-color: #9c9270; background: repeating-linear-gradient(0deg, transparent 0 1.35rem, #b8ad8b0c 1.35rem 1.4rem); }
+@media (max-width: 900px), (max-height: 460px) {
+  .doc-identidade, .doc-habilitacao, .doc-profissional { width: min(21rem, calc(100vw - 4rem)); }
+}
+
+/* Identidade mais compacta, preservando foto e tamanho dos dados. */
+.doc-identidade { width: max(16.5rem, calc(12.5 * var(--cm))); padding: .5rem .65rem; }
+.doc-identidade .doc-heading { margin: -.5rem -.65rem .5rem; padding: .4rem .65rem; gap: .4rem; }
+.doc-identidade .doc-emblem { width: 1.55rem; height: 1.85rem; }
+.doc-identidade .doc-card-body { gap: .6rem; padding-bottom: .4rem; }
+.doc-identidade .doc-name-block { gap: .4rem; }
+.doc-identidade .doc-details { padding: .4rem 0; gap: .55rem; }
+.doc-identidade .doc-code { min-height: 1.75rem; }
+.doc-identidade .doc-code b { padding: .3rem .6rem; }
+.doc-identidade footer { margin: .4rem -.65rem -.5rem; padding: .3rem .65rem; }
+@media (max-width: 900px), (max-height: 460px) {
+  .doc-identidade { width: min(18rem, calc(100vw - 4rem)); }
+}
+
+/* ----------------------------------------------------------- o tutorial -- */
+
+/* Enquanto a coordenadora explica, a sala escurece em volta do assunto: o que
+   não é o objetivo do passo apaga e sai do caminho do ponteiro, e o que é
+   acende com o mesmo brilho da peça da vez. */
+.apagado {
+  opacity: 0.16;
+  filter: grayscale(0.9);
+  pointer-events: none;
+  transition: opacity 0.4s ease, filter 0.4s ease;
+}
+
+.piece.apagado {
+  transition: opacity 0.4s ease, filter 0.4s ease, left 0.22s ease, top 0.22s ease;
+}
+
+.piece.em-foco {
+  animation: vez 1.8s ease-in-out infinite;
+}
+
+.top.em-foco,
+.room.em-foco,
+.mesa-acoes.em-foco {
+  animation: foco 1.9s ease-in-out infinite;
+}
+
+@keyframes foco {
+  0%,
+  100% {
+    box-shadow: 0 0 0.7rem rgba(224, 179, 74, 0.4);
+  }
+
+  50% {
+    box-shadow: 0 0 1.8rem rgba(240, 200, 110, 0.85);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .piece.em-foco,
+  .top.em-foco,
+  .room.em-foco,
+  .mesa-acoes.em-foco {
+    animation: none;
+    box-shadow: 0 0 1.2rem rgba(240, 200, 110, 0.8);
+  }
+}
+
+/* O crachá dela, no lugar onde o eleitor não tem nome nenhum. */
+.tutor-tag {
+  align-self: flex-start;
+  margin: 0;
+  padding: 0.15rem 0.5rem;
+  color: #2f4a3c;
+  background: #cfe0cd;
+  border-left: 0.2rem solid #6d8b74;
+  border-radius: 0.1rem;
+  font: 700 0.68rem/1.4 var(--mono);
+  letter-spacing: 0.02em;
+}
+
+/* As escolhas dela ocupam a largura toda: são resposta, não pergunta. */
+.tutorial-escolhas {
+  flex: none;
+  max-height: none;
+  overflow: visible;
+}
+
+.tutorial-escolhas .pergunta {
+  width: 100%;
+}
+
+.pular-tutorial {
+  justify-self: end;
+  padding: 0.2rem 0.35rem;
+  border: 0;
+  background: none;
+  color: #77856f;
+  font: 600 0.68rem/1.2 var(--sans);
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.pular-tutorial:hover {
+  color: #3f5b48;
+}
+/* Instrumentos da seção: uma placa fixada ao painel, sem marca de site. */
+.top { background: linear-gradient(#94a298, #81938b); border-top: 1px solid #bfc7b4; border-bottom: .25rem solid #536d64; border-radius: .45rem; gap: .7rem; grid-template-columns: minmax(0, 1.05fr) minmax(0, .42fr) minmax(0, 2fr) repeat(2, minmax(0, .48fr)) minmax(0, .85fr); box-shadow: inset 0 0 0 1px #aebaaa, 0 .18rem .35rem #3b504333; padding-top: .3rem; padding-bottom: .3rem; }
+.section-plate { position: relative; display: flex; align-items: center; gap: .7rem; padding: .5rem .65rem; background: #e7e4cf; border: 1px solid #afb7a2; border-radius: .18rem; color: #455c52; box-shadow: 0 .12rem #61786b, inset 0 0 0 2px #f4efdd70; min-width: 0; }
+.section-plate::before, .section-plate::after { content: ''; position: absolute; width: .22rem; height: .22rem; border-radius: 50%; background: linear-gradient(135deg, #7c8b7e 40%, #d5d8c3 42% 56%, #7c8b7e 58%); top: .16rem; }
+.section-plate::before { left: .16rem; }.section-plate::after { right: .16rem; }
+.section-number { flex: none; padding-right: .65rem; border-right: 1px solid #a7b19d; }
+.section-number > span { display: block; font: 700 .47rem/1 var(--sans); letter-spacing: .15em; }
+.section-number h1 { margin: .15rem 0 0; font: 700 1.7rem/1 var(--mono); letter-spacing: -.07em; }
+.section-location { display: grid; gap: .25rem; min-width: 0; }
+.section-location strong { font: 800 .64rem/1.1 var(--sans); }
+.section-location span { font: .48rem/1.1 var(--mono); }
+.section-location small { font: .43rem/1.1 var(--sans); letter-spacing: .06em; color: #78826f; }
+.top > .metric:not(.fila-metric) { padding: .45rem .5rem; border: 1px solid #60776b; border-radius: .25rem; background: #314c40; box-shadow: inset 0 .13rem .25rem #102c2840, 0 1px #bac5b1; }
+.top > .metric:not(.fila-metric) .label { font: .52rem/1.2 var(--sans); color: #b3c6a5; letter-spacing: .05em; }
+.top > .metric:not(.fila-metric) .value { color: #e4ebce; font: 700 1.15rem/1 var(--mono); letter-spacing: .06em; }
+.top > .metric:not(.fila-metric) .value.bad { color: #f6b398; }
+.top .fila-metric { padding-left: 0; border: 0; }
+.top .progress { border: 0; padding-left: 0; }
+.top .progress .label { color: #263f34; font: 700 .59rem/1.2 var(--sans); letter-spacing: .015em; display: flex; align-items: center; justify-content: space-between; }
+.top .pular { color: #405849; border: 1px solid #677d6d; background: #bec9b3; box-shadow: 0 .1rem #596f60; border-radius: .15rem; padding: .05rem .2rem; font-size: .7rem; }
+.top .dots { gap: .2rem; }
+.top .dots i { width: .5rem; height: .5rem; }
+.queue-tooltip { position: fixed; z-index: 180; pointer-events: none; display: grid; gap: .3rem; padding: .7rem .8rem; color: #eaf0de; background: #304c40; border: 1px solid #829480; border-radius: .4rem; box-shadow: 0 .35rem 1rem #203d3540; font-family: var(--sans); }
+.queue-tooltip strong { font-size: .85rem; line-height: 1.2; }
+.queue-tooltip span { color: #d7e3c9; font-size: .78rem; }
+.queue-tooltip small { padding-top: .35rem; border-top: 1px solid #ffffff25; color: #aebfa4; font-size: .6rem; }
+.queue-tooltip.priority { border-top: .2rem solid #e0b34a; }
+.queue-tooltip.priority span { color: #f4d183; }
+
+/* Console inferior: teclas de plástico, rebaixo e aresta que afunda. */
+.mesa-acoes { background: linear-gradient(#aab7a3, #94a38f); border: 1px solid #bec8b3; border-bottom: .25rem solid #607863; box-shadow: inset 0 0 0 1px #83977d, 0 .14rem .2rem #3f563529; padding: .45rem .6rem; gap: .35rem .65rem; border-radius: .4rem; }
+.passo { align-items: center; padding: .45rem .6rem; color: #dbe7cc; background: #304b3c; border: 1px solid #71846a; border-radius: .2rem; box-shadow: inset 0 .15rem .25rem #142d2440; font: .77rem/1.35 var(--sans); }
+.passo b { font-size: .51rem; color: #abc098; letter-spacing: .05em; }
+.saidas { gap: .45rem; padding: .1rem .1rem .32rem; flex-wrap: nowrap; }
+.saida { --key-accent: #728070; --key-depth: #87907a; position: relative; gap: .5rem; padding: .55rem .65rem; color: #35473a; background: linear-gradient(#fffbed 0%, #f0ecd9 80%, #dedcc5 100%); border: 1px solid #f5f2dd; border-bottom-color: #d2d3b7; border-radius: .32rem; box-shadow: inset 0 .12rem #ffffffa0, inset .12rem 0 #ffffff60, inset -.12rem 0 #c8cbb455, 0 .28rem 0 var(--key-depth), 0 .36rem 0 #546b57, 0 .45rem .25rem #29452c35; font: 700 .73rem/1.2 var(--sans); letter-spacing: 0; transition: transform .08s, box-shadow .08s; }
+.saida > span { max-width: 10.5rem; }
+.saida::before { content: ''; width: .18rem; align-self: stretch; background: var(--key-accent); border-radius: .1rem; }
+.saida kbd { flex: none; padding: 0; color: var(--key-accent); background: none; box-shadow: none; font: 700 .85rem/1 var(--mono); }
+.saida.encaminhar { --key-accent: #647c73; }
+.saida.justificar { --key-accent: #627890; }
+.saida.juiz { --key-accent: #806178; }
+.saida.suspender { --key-accent: #a36643; background: linear-gradient(#f7dfba, #e9cd9f); border-color: #ffe9c8; --key-depth: #b7a17c; }
+.saida:active:not(:disabled) { transform: translateY(.25rem); box-shadow: inset 0 1px #ffffff60, 0 .03rem var(--key-depth), 0 .1rem #546b57; }
+.saida:hover:not(:disabled) { filter: brightness(1.04); }
+.saida:disabled { color: #899480; filter: saturate(.55); opacity: .65; }
+.mesa-nota { color: #52634d; font: .48rem/1.2 var(--sans); letter-spacing: .035em; }
+@media (max-width: 1240px) { .mesa-acoes { grid-template-columns: 1fr; } .saidas { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+@media (max-width: 900px) { .top { grid-template-columns: minmax(0, 1.1fr) minmax(0, .42fr) minmax(0, 1.5fr) repeat(2, minmax(0, .45fr)); gap: .4rem; } .top .progress { grid-column: 1 / -1; } .section-location small { display: none; } }
+@media (max-width: 600px) { .section-location { display: none; } .section-number { border: 0; padding: 0; } .section-plate { justify-content: center; } .saida { padding: .45rem .35rem; gap: .3rem; font-size: .66rem; } }
