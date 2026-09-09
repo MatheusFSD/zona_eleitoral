@@ -81,7 +81,7 @@ export default function Desk({ person, calling, c, ledger, signatures, blocked, 
             </Piece>
 
             <Piece id="leitor" desk={desk} foco={foco} className="p-leitor" label="Leitor biométrico" hint={pending && step === "biometria"}>
-              <Reader c={c} onRead={on.read} />
+              <Reader c={c} onRead={on.read} person={person} active={!!pending && step === "biometria"} />
             </Piece>
 
             <Piece id="listagem" desk={desk} foco={foco} className="p-listagem" label="Folha de impedidos">

@@ -40,6 +40,9 @@ export function useDesk(initial, onDrop) {
 
   const grab = useCallback(
     (id) => (e) => {
+      // Portais seguem a árvore React ao propagar eventos, mas não pertencem
+      // ao objeto no DOM. A mão nunca deve iniciar o arrasto do leitor.
+      if (e.defaultPrevented || !e.currentTarget.contains(e.target)) return;
       if (e.pointerType === "mouse" && e.button !== 0) return;
       raise(id);
       if (e.target.closest("button, input, select, textarea, a, [data-nodrag]")) return;

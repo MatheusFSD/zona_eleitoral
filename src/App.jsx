@@ -528,6 +528,7 @@ export default function App() {
 
   useEffect(() => {
     const onKeyDown = (e) => {
+      if (e.defaultPrevented || e.target.closest?.(".biometric-hand")) return;
       if (e.metaKey || e.ctrlKey || e.altKey) return;
 
       if (phase === "feedback" && (e.key === "Enter" || e.key === " ")) {
@@ -553,7 +554,8 @@ export default function App() {
 
       const key = e.key.toUpperCase();
       if (key === "B") {
-        onRead();
+        e.preventDefault();
+        document.querySelector(".biometric-hand")?.focus({ preventScroll: true });
         return;
       }
       const action = ACTIONS.find((a) => a.hotkey === key);
@@ -581,7 +583,7 @@ export default function App() {
 
   return (
     <>
-      <main className="app">
+      <main className="app" inert={phase === "start" || phase === "opening"}>
         <TopBar
           time={hora}
           crowd={crowd}
@@ -634,7 +636,7 @@ export default function App() {
         {live}
       </p>
 
-      {phase === "start" && <StartModal total={total} onStart={open} />}
+      {phase === "start" && <StartModal onStart={open} />}
       {phase === "opening" && <OpeningModal seedText={shift.seed} onStart={start} />}
       {phase === "feedback" && result && (
         <FeedbackModal result={result} last={waiting.length === 0} onNext={next} />

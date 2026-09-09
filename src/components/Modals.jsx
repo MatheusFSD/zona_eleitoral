@@ -8,46 +8,7 @@ function useAutoFocus(active) {
   return ref;
 }
 
-export function StartModal({ total, onStart }) {
-  const ref = useAutoFocus(true);
-
-  return (
-    <div className="overlay">
-      <section className="modal" role="dialog" aria-modal="true" aria-labelledby="start-title">
-        <div className="modal-kicker">Protótipo · turno comprimido</div>
-        <h2 id="start-title">Um dia na Seção 127</h2>
-        <p className="intro">
-          Confira cada pessoa, siga o procedimento e mantenha a fila andando. Você nunca verá em quem alguém votou.
-        </p>
-        <p>
-          O relógio avança em saltos para condensar um dia inteiro em poucos minutos. Os casos ficam mais ambíguos
-          conforme a pressão aumenta.
-        </p>
-        <div className="stats">
-          <div className="stat">
-            <span>Meta</span>
-            <strong>{total} casos</strong>
-          </div>
-          <div className="stat">
-            <span>Início</span>
-            <strong>08:00</strong>
-          </div>
-          <div className="stat">
-            <span>Fim</span>
-            <strong>17:00</strong>
-          </div>
-        </div>
-        <p className="hint">
-          Atalhos: números digitam no terminal · Enter confirma · B lê a digital · P pergunta os dados · E, J, C e S
-          são as saídas da mesa.
-        </p>
-        <button className="primary" ref={ref} onClick={onStart}>
-          Abrir a seção
-        </button>
-      </section>
-    </div>
-  );
-}
+export { default as StartModal } from "./Story.jsx";
 
 export function FeedbackModal({ result, last, onNext }) {
   const ref = useAutoFocus(true);

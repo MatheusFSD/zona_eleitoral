@@ -4,12 +4,11 @@ import { seed, stream } from "../random.js";
 import { tone } from "../sound.js";
 
 /* A abertura da seção: antes de a porta abrir, a urna imprime a zerésima — o
-   papel que mostra a contagem começando do zero. Um clique, a fita desce, e o
+   papel que mostra a contagem começando do zero. Um clique, a fita sobe, e o
    dia começa sozinho quando ela termina de sair.
 
-   A urna aqui é inventada de propósito: nem o formato da máquina nem o
-   relatório copiam equipamento ou documento real. É a urna da Seção 127, que
-   só existe neste protótipo, e o papel diz isso impresso. */
+   A carcaça lembra a urna brasileira, mantendo o desenho do jogo.
+   O relatório é fictício e continua marcado como sem valor oficial. */
 
 const PRINT_MS = 3600;
 const HOLD_MS = 1600; // o tempo de olhar a fita inteira antes de a porta abrir
@@ -122,7 +121,16 @@ export default function OpeningModal({ seedText, onStart }) {
 function Urn({ lit, children }) {
   return (
     <div className={`urna urn-device${lit ? " is-printing" : ""}`} aria-label="Urna UV 127 com impressora integrada">
-      <div className="urn-handle" />
+      <div className="urn-printer-top">
+        <svg className="urn-top-plane" viewBox="0 0 1000 80" preserveAspectRatio="none" aria-hidden="true">
+          <path d="M30 2H970L998 79H2Z" fill="#c8ccb9" stroke="#87958c" strokeWidth="2" />
+          <path d="M30 2H970" fill="none" stroke="#e5e7d4" strokeWidth="3" />
+          <path d="M970 2L998 79H982L958 2Z" fill="#a1ad9e" />
+          <path d="M2 79H998" fill="none" stroke="#eef0dc" strokeWidth="3" />
+        </svg>
+        <div className="urn-slot">{children}</div>
+        <div className="urn-printer-label">IMPRESSORA <span>●</span></div>
+      </div>
       <div className="urn-body">
         <header className="urn-label"><b>SEÇÃO <em>127</em></b><span>● LIGADO</span></header>
         <div className="urn-panel">
@@ -135,11 +143,10 @@ function Urn({ lit, children }) {
           </div>
           <div className="urn-keypad" aria-hidden="true">
             {[1,2,3,4,5,6,7,8,9].map(n => <span key={n}>{n}</span>)}
-            <span className="urn-zero">0</span><span className="urn-correct">CORRIGE</span><span className="urn-confirm">CONFIRMA</span>
+            <span className="urn-zero">0</span>
+            <div className="urn-function-keys"><span className="urn-white">BRANCO</span><span className="urn-correct">CORRIGE</span><span className="urn-confirm">CONFIRMA</span></div>
           </div>
         </div>
-        <div className="urn-printer-label">IMPRESSORA TÉRMICA <span>●</span></div>
-        <div className="urn-slot">{children}</div>
         <footer className="urn-bottom"><span>⊖</span> UNIDADE DE VOTAÇÃO · UV 127 <span>⊖</span></footer>
       </div>
       <div className="urn-feet"><i /><i /></div>

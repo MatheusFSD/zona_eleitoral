@@ -29,6 +29,8 @@ export const MANUAL = [
     id: "biometria",
     title: "Biometria",
     items: [
+      "Arraste a mão e segure o indicador no leitor por 3 segundos.",
+      "Soltar ou sair do sensor reinicia a coleta sem gastar tentativa.",
       "Até quatro tentativas no leitor.",
       "Esgotadas, pergunte o ano de nascimento.",
       "Se o ano bater, a pessoa assina o caderno.",

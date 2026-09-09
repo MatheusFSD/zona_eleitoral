@@ -1,0 +1,16 @@
+﻿.cutscene-overlay { position: fixed; inset: 0; z-index: 200; overflow: auto; display: grid; place-items: center; padding: 1rem; background: #182f3a; color: #eee7d5; font-family: var(--sans); }
+.cutscene { width: min(70rem, 100%); margin: auto; border: 3px solid #102b3a; background: #294959; }
+.cutscene-picture { position: relative; height: min(58dvh, 36rem); min-height: 14rem; background: #dfd9c6; overflow: hidden; border-bottom: 5px solid #102b3a; }
+.cutscene-picture > img { width: 100%; height: 100%; display: block; object-fit: cover; object-position: center; animation: scene-reveal .2s ease both; }
+.cutscene-location { position: absolute; top: 1rem; left: 1rem; max-width: calc(100% - 13rem); margin: 0; padding: .6rem .8rem; font: 600 .8rem/1.4 var(--sans); background: #294959; color: #f0e8d2; border: 2px solid; border-color: #829ca6 #102b3a #102b3a #829ca6; }
+.cutscene-skip { position: absolute; right: 1rem; top: 1rem; color: #eee6d2; background: #294959; border: 1px solid #829ca6; padding: .6rem; cursor: pointer; font: .7rem var(--sans); }
+.cutscene-dialogue { padding: 1.2rem 1.6rem 1rem; border: 3px solid; border-color: #7896a2 #142e3b #142e3b #567b8a; }
+.cutscene-speaker { display: block; color: #e4cb97; font-size: .7rem; font-weight: 700; letter-spacing: .09em; }.cutscene-speaker span { color: #a7c0ca; font-weight: 400; }
+.cutscene-dialogue > p { font-size: 1.1rem; line-height: 1.7; min-height: 3.4em; margin: .8rem 0 1rem; max-width: 60rem; }
+.cutscene-controls, .cutscene-controls > div { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+.cutscene-chapters { display: flex; gap: .35rem; }.cutscene-chapters i { width: 1.2rem; height: .25rem; background: #567785; }.cutscene-chapters i.active { background: #e4cb97; }
+.cutscene-back { background: none; border: 0; color: #b3cbd3; font: .8rem var(--sans); cursor: pointer; padding: .5rem; }
+.cutscene-controls .primary { font-size: .85rem; text-transform: uppercase; letter-spacing: .03em; }.cutscene-controls .primary span { margin-left: 1.5rem; font-size: .65rem; }
+@keyframes scene-reveal { from { opacity: .3; } to { opacity: 1; } }
+@media (max-width: 650px) { .cutscene-overlay { padding: .5rem; }.cutscene-picture { height: 44dvh; }.cutscene-location { top: .5rem; left: .5rem; max-width: calc(100% - 8rem); font-size: .65rem; padding: .4rem; }.cutscene-skip { top: .5rem; right: .5rem; font-size: .6rem; padding: .4rem; }.cutscene-dialogue { padding: 1rem; }.cutscene-dialogue > p { font-size: 1rem; min-height: 6.8em; }.cutscene-controls { gap: .5rem; } }
+@media (prefers-reduced-motion: reduce) { .cutscene-picture > img { animation: none; } }

@@ -11,7 +11,7 @@
 export const STEP = {
   terminal: "Digite no terminal a identificação do documento.",
   caderno: "Ache na folha o nome que está no terminal.",
-  biometria: "Peça a digital no leitor.",
+  biometria: "Encaixe o indicador no leitor e segure a mão por 3 segundos.",
   ano: "Pergunte o ano de nascimento e digite no terminal.",
   assinatura: "A pessoa assina o caderno.",
   cabina: "A pessoa deixou as coisas na carteira e foi votar.",

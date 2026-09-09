@@ -1,0 +1,12 @@
+.biometric-layer { position: fixed; inset: 0; z-index: 2147483647; pointer-events: none; }
+.biometric-hand { position: absolute; top: 0; left: 0; width: clamp(150px, 17vw, 230px); aspect-ratio: 220 / 300; pointer-events: none; touch-action: none; user-select: none; cursor: grab; outline: none; }
+.biometric-hand.is-held { cursor: grabbing; }
+.biometric-hand svg { display: block; width: 100%; height: 100%; overflow: visible; transform: rotate(180deg); }
+.biometric-hand svg path, .biometric-hand svg rect { pointer-events: visiblePainted; }
+.biometric-hand:focus-visible svg { filter: drop-shadow(0 0 3px #f0c86e); }
+.biometric-fingertip { position: absolute; left: 62%; top: 90%; width: 18px; height: 18px; transform: translate(-50%, -50%); border: 2px dashed #fff8df; border-radius: 50%; pointer-events: none; }
+.biometric-hand.is-aligned .biometric-fingertip { border-style: solid; border-color: #b4edbb; background: #45785655; }
+.leitor .leitor-visor { display: grid; grid-template-columns: minmax(0, 1fr) auto; row-gap: .2rem; }
+.leitor-tempo { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.leitor-coleta { grid-column: 1 / -1; height: .25rem; background: #8fa17e; }
+.leitor-coleta i { display: block; height: 100%; background: #365f47; }

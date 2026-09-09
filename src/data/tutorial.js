@@ -99,9 +99,10 @@ export const PASSOS = [
   {
     id: "biometria",
     foco: ["leitor"],
-    objetivo: "Peça a digital no leitor.",
+    objetivo: "Arraste a mão até o leitor e segure o dedo encaixado por 3 segundos.",
     fala: [
-      "Agora a digital. Ela encosta o dedo no leitor e espera o visor.",
+      "Agora a digital. A mão da pessoa aparece na tela. Segure e arraste a mão para encaixar a ponta do indicador no leitor. Mantenha o botão pressionado por três segundos.",
+      "Se soltar ou tirar o dedo, a coleta recomeça sem gastar tentativa. Pelo teclado, B seleciona a mão, as setas movem e espaço segura; Shift com as setas faz o ajuste fino.",
       "Se não pegar, tem quatro tentativas. Passou das quatro, você pergunta o ano de nascimento e digita no terminal. Conferindo, ela assina o caderno e vai votar.",
     ],
     botao: "Entendi",

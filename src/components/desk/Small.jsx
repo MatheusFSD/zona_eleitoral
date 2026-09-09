@@ -1,4 +1,6 @@
-import { useId } from "react";
+import { useEffect, useId, useRef, useState } from "react";
+import BiometricHand from "../BiometricHand.jsx";
+import { SCAN_MS } from "../../biometric.js";
 
 export { default as Handbook } from "./Handbook.jsx";
 
@@ -18,8 +20,11 @@ const BIO_LABEL = {
   esgotada: "Tentativas esgotadas",
 };
 
-export function Reader({ c, onRead }) {
+export function Reader({ c, onRead, person, active }) {
   const statusId = useId();
+  const sensor = useRef(null);
+  const [progress, setProgress] = useState(0);
+  useEffect(() => { setProgress(0); }, [active, person?.id, c.tries]);
   const state = c.bio;
   const done = state === "ok" || state === "esgotada";
 
@@ -36,7 +41,7 @@ export function Reader({ c, onRead }) {
         <i className={`leitor-led ${state}`} aria-hidden="true" />
       </div>
       <div className="leitor-berco">
-      <button type="button" className={`vidro ${state}`} onClick={onRead} disabled={done} aria-label="Ler digital" aria-describedby={statusId}>
+      <div ref={sensor} className={`vidro ${state}`} role="img" aria-label="Sensor para encaixar o indicador" aria-describedby={statusId}>
         <svg viewBox="0 0 60 60" aria-hidden="true">
           <g fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round">
             <path d="M30 46c0-9 0-14 0-18" />
@@ -47,16 +52,18 @@ export function Reader({ c, onRead }) {
             <path d="M23 16c5-3 11-3 15 0" />
           </g>
         </svg>
-      </button>
+      </div>
       <span className="leitor-guia" aria-hidden="true">encaixe o dedo</span>
       </div>
       <div className="leitor-visor" id={statusId} role="status">
-        <b>{BIO_LABEL[state]}</b>
-        <small>{c.tries}/4</small>
+        <b>{active && progress > 0 ? "Lendo digital" : BIO_LABEL[state]}</b>
+        <small className="leitor-tempo" aria-live="off">{active && !done ? `${((1 - progress / 100) * SCAN_MS / 1000).toFixed(1).replace(".", ",")} s` : `${c.tries}/4`}</small>
+        <div className="leitor-coleta" style={{ visibility: active && !done ? "visible" : "hidden" }} role="progressbar" aria-label="Coleta da digital" aria-valuemin={0} aria-valuemax={100} aria-valuenow={progress} aria-live="off"><i style={{ width: `${progress}%` }} /></div>
       </div>
       <div className="leitor-base" aria-hidden="true">
         <i className="aparelho-parafuso" /><span>LEITOR ÓPTICO</span><i className="aparelho-parafuso" />
       </div>
+      {active && person && !done && <BiometricHand key={`${person.id}-${c.tries}`} person={person} sensor={sensor} onProgress={setProgress} onComplete={onRead} />}
     </section>
   );
 }
@@ -148,4 +155,3 @@ export function Blocked({ list, found, onFind }) {
     </section>
   );
 }
-
