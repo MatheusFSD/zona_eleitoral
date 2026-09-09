@@ -14,6 +14,54 @@ npm run preview # serve o dist/
 
 O build usa `base: "./"`, então `dist/index.html` também abre direto do disco.
 
+## Publicar
+
+O build sai com `base: "./"`, ou seja, todo caminho é relativo. É isso que
+deixa o mesmo `dist/` funcionar nos três lugares: aberto do disco, num
+subcaminho como `usuario.github.io/zona_eleitoral/` e dentro do iframe do
+itch.io.
+
+### GitHub Pages
+
+Já existe o fluxo [.github/workflows/pages.yml](.github/workflows/pages.yml):
+a cada push na `main` ele instala, constrói e publica o `dist/`. Falta um
+passo manual, uma vez só, no repositório:
+
+**Settings › Pages › Build and deployment › Source: GitHub Actions.**
+
+Feito isso, o endereço é `https://<usuario>.github.io/zona_eleitoral/`, e cada
+push republica. Para publicar à mão, a aba **Actions** tem o botão *Run
+workflow*.
+
+### itch.io
+
+```sh
+npm run itch    # constrói e gera secao-127-itch.zip
+```
+
+ou, no Windows, um clique duplo em
+[empacotar-itch.bat](empacotar-itch.bat).
+
+O zip é escrito por [empacotar.mjs](empacotar.mjs), e não pelo compactador do
+Windows, por um motivo prático: o `Compress-Archive` grava os caminhos com
+barra invertida e o `tar` do Windows prefixa tudo com `./` — nos dois casos o
+itch serve o `index.html` mas erra os assets. O empacotador aqui escreve cada
+nome como o navegador vai pedir.
+
+No itch, ao criar o projeto:
+
+| Campo | Valor |
+| --- | --- |
+| Kind of project | HTML |
+| Upload | `secao-127-itch.zip`, marcado como *This file will be played in the browser* |
+| Viewport | 1280 × 800 |
+| Fullscreen button | ligado |
+| Mobile friendly | desligado (o jogo pede mouse e uma tela larga) |
+
+O jogo busca três fontes no Google Fonts para as assinaturas do caderno. Elas
+carregam normalmente no itch; sem rede, o caderno cai numa letra do sistema e
+o resto continua igual.
+
 ## Estrutura
 
 | Caminho | O que é |
