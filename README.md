@@ -130,9 +130,12 @@ o resto continua igual.
 
 O jogo abre no idioma do navegador: qualquer coisa que comece com `pt` abre em
 português, todo o resto abre em inglês. No menu principal, a terceira opção
-troca — e a escolha fica guardada no navegador, valendo por cima da detecção na
-próxima visita. Trocar redesenha a tela inteira na hora, no meio da partida
-inclusive.
+mostra as duas bandeiras — a acesa é a língua de agora — e um clique troca. A
+escolha fica guardada no navegador, valendo por cima da detecção na próxima
+visita, e trocar redesenha a tela inteira na hora, no meio da partida inclusive.
+
+As bandeiras são desenhadas em SVG, e não em emoji: no Windows o 🇧🇷 aparece
+como as letras "BR", porque a fonte do sistema não traz os glifos de país.
 
 **Nomes de pessoas e de lugares não se traduzem.** Neusa Prado continua Neusa
 Prado, a Escola Municipal Horizonte mantém o nome, Monte Alegre e as outras

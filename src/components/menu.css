@@ -27,3 +27,10 @@
 @keyframes menu-arrive { from { opacity: .2; transform: scale(1.02); } to { opacity: .85; transform: scale(1); } }
 @media (max-aspect-ratio: 3 / 4) { .menu-content { justify-content: flex-end; padding-bottom: 9dvh; }.menu-shade { background: linear-gradient(0deg, #112d37fc 5%, #18343be8 32%, #17353a60 74%, #19363810); }.menu-scenery { object-position: 64% center; }.menu-title > strong { font-size: clamp(2.2rem, 10vw, 5rem); } }
 @media (prefers-reduced-motion: reduce) { .studio-intro > img, .menu-scenery { animation: none; }.menu-options > button { transition: none; } }
+/* A opção de idioma: o texto e as duas bandeiras, a acesa sendo a de agora. */
+.menu-idioma { display: flex; align-items: center; gap: .8rem; }
+.menu-bandeiras { display: inline-flex; gap: .4rem; margin: 0; }
+.menu-bandeiras { font-size: 1rem; }
+.bandeira { display: block; width: clamp(1.9rem, 3.6vw, 2.8rem); height: auto; border-radius: .08em; box-shadow: 0 0 0 1px #0b252b40, 0 .1rem .25rem #0b252b66; opacity: .45; filter: grayscale(.5); transition: opacity .12s, filter .12s, box-shadow .12s; }
+.bandeira.ativa { opacity: 1; filter: none; box-shadow: 0 0 0 2px #edc47a, 0 .12rem .3rem #0b252b80; }
+@media (prefers-reduced-motion: reduce) { .bandeira { transition: none; } }

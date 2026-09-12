@@ -127,7 +127,10 @@ test("logo e aviso duram três segundos cada antes do menu Zona Eleitoral", asyn
   assert.ok(buttons().find((b) => b.textContent === "Carregar jogo").disabled);
   const idioma = buttons().find((b) => b.textContent.startsWith("Idioma"));
   assert.equal(idioma.disabled, false);
-  assert.match(idioma.textContent, /Português/);
+  assert.match(idioma.getAttribute("aria-label"), /Idioma: Português/);
+  // A bandeira acesa é a da língua de agora; a outra fica apagada.
+  assert.ok(idioma.querySelector(".bandeira-br.ativa"));
+  assert.ok(idioma.querySelector(".bandeira-us:not(.ativa)"));
   assert.equal(document.activeElement.textContent, "Novo jogo");
   // A opção desativada fica fora da navegação: do primeiro item vai-se ao idioma.
   await act(() => document.activeElement.dispatchEvent(new window.KeyboardEvent("keydown", { key: "ArrowDown", bubbles: true })));
@@ -143,7 +146,10 @@ test("a opção de idioma troca o menu inteiro e marca a língua no documento", 
   await click("Idioma");
   assert.equal(buttons()[0].textContent, "New game");
   assert.equal(buttons()[1].textContent, "Load game");
-  assert.match(buttons()[2].textContent, /^Language .*English/);
+  assert.equal(buttons()[2].textContent.trim(), "Language");
+  assert.ok(buttons()[2].querySelector(".bandeira-us.ativa"));
+  assert.ok(buttons()[2].querySelector(".bandeira-br:not(.ativa)"));
+  assert.match(buttons()[2].getAttribute("aria-label"), /Language: English/);
   assert.equal(document.documentElement.lang, "en");
   // E volta, para os outros testes continuarem lendo em português.
   await click("Language");
