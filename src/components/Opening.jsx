@@ -1,7 +1,29 @@
 import { useEffect, useRef, useState } from "react";
 
-import { seed, stream } from "../random.js";
 import { tone } from "../sound.js";
+import { Fan, Window } from "./Classroom.jsx";
+import UrnReport from "./UrnReport.jsx";
+import { t } from "../i18n.js";
+
+/* O que a máquina escreve em si mesma e na tela. */
+const URNA = {
+  abertura: { pt: "Abertura da seção", en: "Opening the section" },
+  imprimir: { pt: "Imprimir zerésima", en: "Print the zero tape" },
+  imprimindo: { pt: "Imprimindo…", en: "Printing…" },
+  maquina: { pt: "Urna UV 127 com impressora integrada", en: "UV 127 voting machine with built-in printer" },
+  impressora: { pt: "IMPRESSORA", en: "PRINTER" },
+  secao: { pt: "SEÇÃO", en: "SECTION" },
+  ligado: { pt: "● LIGADO", en: "● ON" },
+  fim: { pt: "FIM", en: "END" },
+  aberturaTela: { pt: "ABERTURA", en: "OPENING" },
+  registro: { pt: "REGISTRO DE VOTOS", en: "VOTES RECORDED" },
+  emitindo: { pt: "EMITINDO ZERÉSIMA", en: "PRINTING ZERO TAPE" },
+  pronta: { pt: "PRONTA PARA ABRIR", en: "READY TO OPEN" },
+  branco: { pt: "BRANCO", en: "BLANK" },
+  corrige: { pt: "CORRIGE", en: "CORRECT" },
+  confirma: { pt: "CONFIRMA", en: "CONFIRM" },
+  unidade: { pt: "UNIDADE DE VOTAÇÃO · UV 127", en: "VOTING UNIT · UV 127" },
+};
 
 /* A abertura da seção: antes de a porta abrir, a urna imprime a zerésima — o
    papel que mostra a contagem começando do zero. Um clique, a fita sobe, e o
@@ -14,18 +36,6 @@ const PRINT_MS = 3600;
 const HOLD_MS = 1600; // o tempo de olhar a fita inteira antes de a porta abrir
 
 const reduced = () => window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
-
-/* Os números saem da semente do turno: a zerésima combina com o dia que vem
-   depois dela e volta igual com `?turno=`. */
-function report(key) {
-  const rnd = stream(seed(`${key}-abertura`));
-  const int = (a, b) => a + Math.floor(rnd() * (b - a + 1));
-  const hex = () => "0123456789ABCDEF"[int(0, 15)];
-  return {
-    aptos: int(268, 349),
-    code: `${hex()}${hex()}${int(10, 99)}-${hex()}${int(100, 999)}`,
-  };
-}
 
 export default function OpeningModal({ seedText, onStart }) {
   const [printing, setPrinting] = useState(false);
@@ -51,64 +61,23 @@ export default function OpeningModal({ seedText, onStart }) {
     );
   };
 
-  const { aptos, code } = report(seedText);
-
   return (
-    <div className="overlay">
-      <section className="modal opening" role="dialog" aria-modal="true" aria-label="Abertura da seção">
-        <div className="urna-cena">
-          <Urn lit={printing}>
-
-          {printing && (
-            <div className="fita">
-              <article className="zeresima" aria-label="Zerésima impressa">
-                <p className="zr-head">
-                  SEÇÃO 127
-                  <br />
-                  ZONA 041
-                </p>
-                <div className="zr-rule" />
-                <h3>Zerésima</h3>
-                <div className="zr-row">
-                  <span>TURNO</span>
-                  <b>{seedText}</b>
-                </div>
-                <div className="zr-row">
-                  <span>APTOS</span>
-                  <b>{aptos}</b>
-                </div>
-                <div className="zr-row">
-                  <span>VOTOS</span>
-                  <b>000</b>
-                </div>
-                <div className="zr-row">
-                  <span>BRANCOS</span>
-                  <b>000</b>
-                </div>
-                <div className="zr-row">
-                  <span>NULOS</span>
-                  <b>000</b>
-                </div>
-                <div className="zr-rule" />
-                <div className="zr-row">
-                  <span>LACRES</span>
-                  <b>OK</b>
-                </div>
-                <div className="zr-rule" />
-                <p className="zr-foot">
-                  {code}
-                  <br />
-                  Sem valor oficial
-                </p>
-              </article>
-            </div>
-          )}
-          </Urn>
+    <div className="opening-film" role="dialog" aria-modal="true" aria-label={t(URNA.abertura)}>
+      <section className={`opening-scene${printing ? " printing" : ""}`}>
+        <Window />
+        <Fan />
+        <div className="opening-light" aria-hidden="true" />
+        <div className="opening-desk" aria-hidden="true" />
+        <div className="opening-urn">
+          <div className="urna-cena">
+            <Urn lit={printing}>
+              {printing && <div className="fita"><UrnReport seedText={seedText} /></div>}
+            </Urn>
+          </div>
         </div>
-
         <div className="opening-actions">
           <button className="primary" ref={button} onClick={print} disabled={printing}>
-            {printing ? "Imprimindo…" : "Imprimir zerésima e começar o dia"}
+            {t(printing ? URNA.imprimindo : URNA.imprimir)}
           </button>
         </div>
       </section>
@@ -118,9 +87,9 @@ export default function OpeningModal({ seedText, onStart }) {
 
 /* Carcaça da mesma família do terminal, com a fita presa à fenda. */
 
-function Urn({ lit, children }) {
+export function Urn({ lit, children, closing = false }) {
   return (
-    <div className={`urna urn-device${lit ? " is-printing" : ""}`} aria-label="Urna UV 127 com impressora integrada">
+    <div className={`urna urn-device${lit ? " is-printing" : ""}`} aria-label={t(URNA.maquina)}>
       <div className="urn-printer-top">
         <svg className="urn-top-plane" viewBox="0 0 1000 80" preserveAspectRatio="none" aria-hidden="true">
           <path d="M30 2H970L998 79H2Z" fill="#c8ccb9" stroke="#87958c" strokeWidth="2" />
@@ -129,25 +98,26 @@ function Urn({ lit, children }) {
           <path d="M2 79H998" fill="none" stroke="#eef0dc" strokeWidth="3" />
         </svg>
         <div className="urn-slot">{children}</div>
-        <div className="urn-printer-label">IMPRESSORA <span>●</span></div>
+        <div className="urn-printer-label">{t(URNA.impressora)} <span>●</span></div>
       </div>
       <div className="urn-body">
-        <header className="urn-label"><b>SEÇÃO <em>127</em></b><span>● LIGADO</span></header>
+        <header className="urn-label"><b>{t(URNA.secao)} <em>127</em></b><span>{closing ? "●" : t(URNA.ligado)}</span></header>
         <div className="urn-panel">
           <div className="urn-screen">
-            <div className="urn-screen-top">ABERTURA <span>07:59</span></div>
-            <span>REGISTRO DE VOTOS</span><strong>000</strong>
-            <span>{lit ? "EMITINDO ZERÉSIMA" : "PRONTA PARA ABRIR"}</span>
+            {closing ? <strong>{t(URNA.fim)}</strong> : <>
+            <div className="urn-screen-top">{t(URNA.aberturaTela)} <span>07:59</span></div>
+            <span>{t(URNA.registro)}</span><strong>000</strong>
+            <span>{t(lit ? URNA.emitindo : URNA.pronta)}</span>
             <div className="urn-progress"><i /></div>
-            <small>{lit ? "IMPRESSORA EM OPERAÇÃO" : "MEMÓRIA CONFERIDA · LACRES OK"}</small>
+            </>}
           </div>
           <div className="urn-keypad" aria-hidden="true">
             {[1,2,3,4,5,6,7,8,9].map(n => <span key={n}>{n}</span>)}
             <span className="urn-zero">0</span>
-            <div className="urn-function-keys"><span className="urn-white">BRANCO</span><span className="urn-correct">CORRIGE</span><span className="urn-confirm">CONFIRMA</span></div>
+            <div className="urn-function-keys"><span className="urn-white">{t(URNA.branco)}</span><span className="urn-correct">{t(URNA.corrige)}</span><span className="urn-confirm">{t(URNA.confirma)}</span></div>
           </div>
         </div>
-        <footer className="urn-bottom"><span>⊖</span> UNIDADE DE VOTAÇÃO · UV 127 <span>⊖</span></footer>
+        <footer className="urn-bottom"><span>⊖</span> {t(URNA.unidade)} <span>⊖</span></footer>
       </div>
       <div className="urn-feet"><i /><i /></div>
     </div>

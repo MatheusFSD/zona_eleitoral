@@ -1,5 +1,8 @@
 import { useEffect, useId, useState } from "react";
 import { faceOf } from "../face.js";
+import { t } from "../i18n.js";
+
+const RETRATO = { pt: "Retrato de {nome}", en: "Portrait of {nome}" };
 
 const BASE = import.meta.env.BASE_URL;
 const INK = "#102b3a";
@@ -60,22 +63,23 @@ function Beard({ style, color, skin }) {
   return <g fill={color}>{shapes[style] ?? null}</g>;
 }
 
-export default function Portrait({ person, faceKey, art: folder = "personagens" }) {
+export default function Portrait({ person, faceKey, art: folder = "personagens", procedural = false }) {
   const [art, setArt] = useState(null);
   const clipId = useId();
   const { id, name } = person;
   const src = `${BASE}images/${folder}/${id}.png`;
 
   useEffect(() => {
+    if (procedural) return;
     const probe = new Image();
     let live = true;
     probe.onload = () => live && setArt(src);
     probe.onerror = () => live && setArt(null);
     probe.src = src;
     return () => { live = false; };
-  }, [src]);
+  }, [src, procedural]);
 
-  if (art === src) return <img src={art} alt={`Retrato de ${name}`} />;
+  if (!procedural && art === src) return <img src={art} alt={t(RETRATO, { nome: name })} />;
 
   const { skin, shirt, hair, style, face, age, beard, glasses, mood, collar, build } = faceOf(person, faceKey);
   const cut = LEGACY[style] ?? style;
@@ -93,6 +97,7 @@ export default function Portrait({ person, faceKey, art: folder = "personagens" 
   const gap = 16 * build.gap;
   const eyes = [30 - gap, 30 + gap];
   const lipY = 65;
+  const irritation = person.look?.irritation;
   const mouth = {
     calm: `M28 ${lipY}h6q4 0 4-4`,
     smile: `M26 ${lipY - 2}q7 8 15-1`,
@@ -101,7 +106,7 @@ export default function Portrait({ person, faceKey, art: folder = "personagens" 
   };
 
   return (
-    <svg viewBox="0 0 160 200" preserveAspectRatio="xMidYMax meet" role="img" aria-label={`Retrato de ${name}`}>
+    <svg viewBox="0 0 160 200" preserveAspectRatio="xMidYMax meet" role="img" aria-label={t(RETRATO, { nome: name })}>
       <g transform={headTransform}><Hair style={cut} color={hair} back /></g>
       {/* O busto mantém o enquadramento da sala e da foto do documento. */}
       <path d="M48 143Q22 147 8 181L3 200H157L152 181Q138 147 112 143Z" fill={shirt} />
@@ -133,11 +138,11 @@ export default function Portrait({ person, faceKey, art: folder = "personagens" 
             <rect x={x - 6.5} y={eyeY - 6} width="13" height="15" rx="6.5" fill="#fffaf0" />
             <circle cx={x + 0.7} cy={eyeY + 1} r={build.eye + 0.3} fill={INK} />
             {mood === "tired" && <path d={`M${x - 6.5} ${eyeY - 2}h13`} stroke={skin} strokeWidth="5" />}
-            <path d={`M${x - 6} ${eyeY - 12 + (i === 0 ? -2 : 0)}l12 ${mood === "tense" ? (i === 0 ? 3 : -3) : 0}`} stroke={eyebrow} strokeWidth="7" strokeLinecap="round" />
+            <path d={`M${x - 6} ${eyeY - 12 + (i === 0 ? -2 : 0)}l12 ${irritation != null ? (i === 0 ? 1 : -1) * irritation * 1.8 : mood === "tense" ? (i === 0 ? 3 : -3) : 0}`} stroke={eyebrow} strokeWidth="7" strokeLinecap="round" />
             {age === "old" && <path d={`M${x - 4} ${eyeY + 13}h8`} stroke={shade} strokeWidth="2" strokeLinecap="round" />}
           </g>
         ))}
-        <path d={mouth[mood] ?? mouth.calm} transform={`translate(33 ${lipY}) scale(${build.mouth} 1) translate(-33 -${lipY})`} fill="none" stroke={cheek} strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
+        <path d={irritation != null ? `M26 ${lipY}q7 ${7 - irritation * 3} 15 0` : mouth[mood] ?? mouth.calm} transform={`translate(33 ${lipY}) scale(${build.mouth} 1) translate(-33 -${lipY})`} fill="none" stroke={cheek} strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round" />
         <path d="M24 74v6" stroke={shade} strokeWidth="4" strokeLinecap="round" />
         <Beard style={beard} color={hair} skin={skin} />
         <rect x={30 - 7 * build.nose} y={eyeY - 7} width={14 * build.nose} height={24 * build.nose} rx={7 * build.nose} fill={noseColor} />

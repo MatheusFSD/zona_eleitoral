@@ -2,6 +2,15 @@ import { useEffect, useId, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { faceOf } from "../face.js";
 import { createScan, fingerInside } from "../biometric.js";
+import { t } from "../i18n.js";
+
+const MAO = {
+  ajuda: {
+    pt: "Arraste a mão e segure o indicador no leitor por três segundos. Pelo teclado, use as setas para mover e espaço para segurar.",
+    en: "Drag the hand and hold the index finger on the reader for three seconds. On the keyboard, use the arrows to move and space to hold.",
+  },
+  mover: { pt: "Mover a mão de {nome}", en: "Move {nome}'s hand" },
+};
 import "./biometric-hand.css";
 
 export default function BiometricHand({ person, sensor, onComplete, onProgress }) {
@@ -84,8 +93,8 @@ export default function BiometricHand({ person, sensor, onComplete, onProgress }
   };
 
   return createPortal(<div className="biometric-layer" onPointerDown={e => e.stopPropagation()} onClick={e => e.stopPropagation()}>
-    <span className="sr" id={helpId}>Arraste a mão e segure o indicador no leitor por três segundos. Pelo teclado, use as setas para mover e espaço para segurar.</span>
-    <div ref={hand} className={`biometric-hand${holding ? " is-held" : ""}${aligned ? " is-aligned" : ""}`} role="button" tabIndex={0} aria-label={`Mover a mão de ${person.name}`} aria-describedby={helpId}
+    <span className="sr" id={helpId}>{t(MAO.ajuda)}</span>
+    <div ref={hand} className={`biometric-hand${holding ? " is-held" : ""}${aligned ? " is-aligned" : ""}`} role="button" tabIndex={0} aria-label={t(MAO.mover, { nome: person.name })} aria-describedby={helpId}
       style={{ transform: `translate3d(${position.current.x}px, ${position.current.y}px, 0)` }}
       onPointerDown={down} onPointerMove={pointerMove} onPointerUp={release} onPointerCancel={release} onLostPointerCapture={release}
       onKeyDown={keyDown} onKeyUp={e => { if (e.key === " ") { e.preventDefault(); release(); } }} onBlur={release} onContextMenu={e => e.preventDefault()}>

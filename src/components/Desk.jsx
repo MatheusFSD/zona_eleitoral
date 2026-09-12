@@ -1,5 +1,4 @@
 ﻿import { Piece } from "../desk.jsx";
-import { STEP } from "../flow.js";
 import { ACTIONS } from "../data/people.js";
 import Caderno from "./desk/Caderno.jsx";
 import Doc from "./desk/Doc.jsx";
@@ -7,6 +6,7 @@ import TerminalPiece from "./desk/TerminalPiece.jsx";
 import { DeskFrame, DeskWear } from "./desk/SchoolDesk.jsx";
 import { Belonging, Blocked, Handbook, Reader, Receipt } from "./desk/Small.jsx";
 import { realce } from "../data/tutorial.js";
+import { TXT, t } from "../i18n.js";
 
 /* A mesa receptora: uma superfície de fórmica com os objetos soltos em cima.
 
@@ -14,7 +14,7 @@ import { realce } from "../data/tutorial.js";
    tamanho que teria de verdade. Documento, terminal, caderno, leitor, livro do
    manual e folha de impedidos são objetos soltos que a mesa empurra para onde
    quiser, e quem foi tocado por último fica por cima. Embaixo, presa, fica só
-   a régua de ações: o passo da vez à esquerda e as saídas à direita. */
+   a régua com as quatro saídas. */
 
 /* Onde cada objeto começa o dia. Percentagem enquanto ninguém mexeu; a partir
    do primeiro arrasto viram pixels. */
@@ -37,7 +37,7 @@ export const ITEM_SPOTS = {
   "item-chaves": SPOTS["item-chaves"],
 };
 
-export default function Desk({ person, calling, c, ledger, signatures, blocked, time, desk, on, running, foco, objetivo }) {
+export default function Desk({ person, c, ledger, signatures, blocked, time, desk, on, running, foco }) {
   const step = c.step;
   const pending = person && running;
   const devolvendo = pending && step === "entrega";
@@ -51,7 +51,7 @@ export default function Desk({ person, calling, c, ledger, signatures, blocked, 
       : person.belongings.filter((k) => !c.given.includes(k));
 
   return (
-    <section className="mesa" aria-label="Mesa receptora">
+    <section className="mesa" aria-label={t(TXT.mesa)}>
       <div className="carteira">
         <DeskFrame />
         <div className="carteira-tampo">
@@ -64,7 +64,7 @@ export default function Desk({ person, calling, c, ledger, signatures, blocked, 
                 desk={desk}
                 foco={foco}
                 className={`p-doc${pending ? " chegando" : ""}`}
-                label="Documento apresentado"
+                label={t(TXT.documentoApresentado)}
                 hint={devolvendo}
                 key={person ? person.id : "vazio"}
               >
@@ -72,23 +72,23 @@ export default function Desk({ person, calling, c, ledger, signatures, blocked, 
               </Piece>
             )}
 
-            <Piece id="terminal" desk={desk} foco={foco} className="p-terminal" label="Terminal" hint={pending && (step === "terminal" || step === "ano")}>
+            <Piece id="terminal" desk={desk} foco={foco} className="p-terminal" label={t(TXT.terminal)} hint={pending && (step === "terminal" || step === "ano")}>
               <TerminalPiece person={person} c={c} time={time} onKey={on.key} />
             </Piece>
 
-            <Piece id="caderno" desk={desk} foco={foco} className="p-caderno" label="Caderno de votação" hint={pending && (step === "caderno" || step === "assinatura")}>
+            <Piece id="caderno" desk={desk} foco={foco} className="p-caderno" label={t(TXT.cadernoVotacao)} hint={pending && (step === "caderno" || step === "assinatura")}>
               <Caderno key={ledger[0]?.seq ?? "vazio"} ledger={ledger} c={c} signatures={signatures} onRow={on.row} onSign={on.sign} />
             </Piece>
 
-            <Piece id="leitor" desk={desk} foco={foco} className="p-leitor" label="Leitor biométrico" hint={pending && step === "biometria"}>
+            <Piece id="leitor" desk={desk} foco={foco} className="p-leitor" label={t(TXT.leitorBiometrico)} hint={pending && step === "biometria"}>
               <Reader c={c} onRead={on.read} person={person} active={!!pending && step === "biometria"} />
             </Piece>
 
-            <Piece id="listagem" desk={desk} foco={foco} className="p-listagem" label="Folha de impedidos">
+            <Piece id="listagem" desk={desk} foco={foco} className="p-listagem" label={t(TXT.folhaImpedidos)}>
               <Blocked list={blocked} found={c.consulted} onFind={on.list} />
             </Piece>
 
-            <Piece id="manual" desk={desk} foco={foco} className="p-manual" label="Manual da mesa">
+            <Piece id="manual" desk={desk} foco={foco} className="p-manual" label={t(TXT.manualDaMesa)}>
               <Handbook />
             </Piece>
 
@@ -101,7 +101,7 @@ export default function Desk({ person, calling, c, ledger, signatures, blocked, 
                 desk={desk}
                 foco={foco}
                 className={`p-item p-${kind}${devolvendo ? "" : " chegando"}`}
-                label={kind}
+                label={t(TXT[kind])}
                 hint={devolvendo}
                 delay={i * 140}
               >
@@ -110,7 +110,7 @@ export default function Desk({ person, calling, c, ledger, signatures, blocked, 
             ))}
 
             {devolvendo && !c.receipt && (
-              <Piece id="comprovante" desk={desk} foco={foco} className="p-comprovante" label="Comprovante" hint>
+              <Piece id="comprovante" desk={desk} foco={foco} className="p-comprovante" label={t(TXT.comprovante)} hint>
                 <Receipt person={person} />
               </Piece>
             )}
@@ -121,13 +121,6 @@ export default function Desk({ person, calling, c, ledger, signatures, blocked, 
       </div>
 
       <div className={`mesa-acoes${realce(foco, "saidas")}`}>
-        <p className="passo">
-          <b>{objetivo ? "Tutorial" : "Passo"}</b>
-          <span>
-            {objetivo ??
-              (pending ? STEP[step] : calling ? "Chame a próxima pessoa no corredor." : "A seção ainda não abriu.")}
-          </span>
-        </p>
         <div className="saidas">
           {ACTIONS.map((a) => (
             <button
@@ -135,14 +128,13 @@ export default function Desk({ person, calling, c, ledger, signatures, blocked, 
               className={`saida ${a.id}`}
               onClick={() => on.action(a.id)}
               disabled={!pending}
-              title={a.hint}
+              title={t(a.hint)}
             >
               <kbd>{a.hotkey}</kbd>
-              <span>{a.label}</span>
+              <span>{t(a.label)}</span>
             </button>
           ))}
         </div>
-        <p className="mesa-nota">Protótipo. Não representa treinamento eleitoral oficial.</p>
       </div>
     </section>
   );

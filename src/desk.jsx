@@ -125,6 +125,11 @@ export function useDesk(initial, onDrop) {
   // Devolve objetos para o lugar de origem — os pertences, a cada pessoa.
   const reset = useCallback((patch) => setSpots((s) => ({ ...s, ...patch })), []);
 
+  const restore = useCallback((saved) => {
+    top.current = Math.max(20, ...Object.values(saved).map((spot) => spot.z ?? 1));
+    setSpots(saved);
+  }, []);
+
   /* Devolve só a ordem da pilha, sem mexer em onde cada coisa está: é o que
      arruma a mesa depois do tutorial, que subiu peça por peça para mostrar. */
   const restack = useCallback((order) => {
@@ -135,7 +140,7 @@ export function useDesk(initial, onDrop) {
     });
   }, []);
 
-  return { spots, grab, target, raise, reset, restack };
+  return { spots, grab, target, raise, reset, restore, restack };
 }
 
 export function Piece({ id, desk, className = "", label, hint, delay = 0, foco, children }) {

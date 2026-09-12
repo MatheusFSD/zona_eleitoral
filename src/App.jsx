@@ -11,8 +11,53 @@ import { tone } from "./sound.js";
 import Desk, { ITEM_SPOTS, SPOTS } from "./components/Desk.jsx";
 import PersonPanel from "./components/PersonPanel.jsx";
 import TopBar from "./components/TopBar.jsx";
-import { EndModal, FeedbackModal, StartModal } from "./components/Modals.jsx";
+import { FeedbackModal, StartModal } from "./components/Modals.jsx";
 import OpeningModal from "./components/Opening.jsx";
+import Closing from "./components/Closing.jsx";
+import Ending from "./components/Ending.jsx";
+import { afterFeedback, finishCase, recordError } from "./day.js";
+import GameMenu, { StudioIntro } from "./components/GameMenu.jsx";
+import { SAVABLE_PHASES, snapshot, readSave, writeSave, clearSave } from "./save.js";
+import { t, useIdioma } from "./i18n.js";
+
+/* O que a mesa avisa em voz alta — o aviso que sobe na tela e o que o leitor
+   de tela anuncia. O terminal escreve em caixa alta, como o aparelho. */
+const AVISO = {
+  dispensada: {
+    pt: "Neusa interrompeu seu trabalho. Você não completou as horas.",
+    en: "Neusa has taken over. You did not complete the hours.",
+  },
+  chegou: { pt: "{nome} chegou à mesa.", en: "{nome} is at the table." },
+  corredor: {
+    pt: "{n} pessoas no corredor. Chame a próxima.",
+    en: "{n} people in the hallway. Call the next one.",
+  },
+  filaOcorrencia: { pt: "Ocorrência na fila: {aviso}", en: "Queue incident: {aviso}" },
+  anoConfere: {
+    pt: "Ano confere. A pessoa assina o caderno.",
+    en: "The year matches. The voter signs the register.",
+  },
+  anoIncompleto: { pt: "ANO INCOMPLETO", en: "YEAR INCOMPLETE" },
+  anoErrado: { pt: "O ano não confere com o cadastro.", en: "The year does not match the record." },
+  anoNaoConfere: { pt: "ANO NÃO CONFERE", en: "YEAR DOES NOT MATCH" },
+  registroNaTela: { pt: "Registro na tela. Agora o caderno.", en: "Record on screen. Now the register." },
+  registroNaoEncontrado: { pt: "REGISTRO NÃO ENCONTRADO", en: "RECORD NOT FOUND" },
+  outroNome: {
+    pt: "Esse não é o nome que está no terminal.",
+    en: "That is not the name on the terminal.",
+  },
+  digitalOk: { pt: "Digital reconhecida.", en: "Fingerprint recognized." },
+  digitalEsgotada: {
+    pt: "Quatro tentativas e nada. Pergunte o ano de nascimento.",
+    en: "Four attempts, nothing. Ask for the year of birth.",
+  },
+  digitalFalhou: {
+    pt: "Digital não reconhecida — tentativa {n} de 4.",
+    en: "Fingerprint not recognized — attempt {n} of 4.",
+  },
+  saiuSemVotar: { pt: "A pessoa saiu da cabina sem votar.", en: "The voter left the booth without voting." },
+  votoComputado: { pt: "Voto computado.", en: "Vote cast." },
+};
 
 const pad = (n, len) => String(n).padStart(len, "0");
 const CABINA_MS = 2900;
@@ -28,11 +73,12 @@ const emMinutos = (hora) => Number(hora.slice(0, 2)) * 60 + Number(hora.slice(3)
 const PINNED = new URLSearchParams(window.location.search).get("turno");
 
 const initialState = {
-  phase: "start", // start | opening | tutorial | chamando | working | feedback | end
+  phase: "splash", // splash | menu | start | opening | tutorial | chamando | working | feedback | closing | end | bad
   index: 0,
   waiting: [], // quem ainda não foi chamado, em ordem de chegada
   clock: ABERTURA,
   served: 0,
+  votes: 0,
   correct: 0,
   errors: 0,
   marks: [],
@@ -40,8 +86,11 @@ const initialState = {
 };
 
 export default function App() {
+  useIdioma();
   const [shift, setShift] = useState(() => makeShift(PINNED));
   const [state, setState] = useState(initialState);
+  const [saved, setSaved] = useState(() => readSave());
+  const [storageError, setStorageError] = useState(false);
   const [c, setC] = useState(newCase);
   // As assinaturas ficam no caderno o turno inteiro, não no caso da vez.
   const [signatures, setSignatures] = useState({});
@@ -55,6 +104,7 @@ export default function App() {
   const cabinaTimer = useRef(null);
   const leaveTimer = useRef(null);
   const deskRef = useRef(null);
+  const restoreSpots = useRef(null);
 
   const { phase, index, waiting, clock, served, correct, errors, marks, result } = state;
   const running = phase === "working";
@@ -89,15 +139,26 @@ export default function App() {
 
   // O resto da fila, que não tem rosto: cresce a cada ocorrência.
   const proxima = people[corredor[0] ?? waiting[0]];
-  const crowd = Math.max(
+  const crowd = ["closing", "end", "bad"].includes(phase) ? 0 : Math.max(
     0,
     (proxima?.queue ?? 0) + errors * 2 - Math.floor(correct / 4) - corredor.length,
   );
-  const hora = phase === "end" ? "17:00" : relogio(clock);
+  const hora = relogio(clock);
+
+  // A remoção interrompe também qualquer cabina ou animação ainda em andamento.
+  useEffect(() => {
+    if (phase !== "bad") return;
+    clearTimeout(cabinaTimer.current);
+    clearTimeout(leaveTimer.current);
+    clearTimeout(toastTimer.current);
+    setLeaving(null);
+    setToast("");
+    setLive(t(AVISO.dispensada));
+  }, [phase]);
 
   useEffect(() => {
-    if (running && person) setLive(`${person.name} chegou à mesa.`);
-    else if (calling) setLive(`${corredor.length} pessoas no corredor. Chame a próxima.`);
+    if (running && person) setLive(t(AVISO.chegou, { nome: person.name }));
+    else if (calling) setLive(t(AVISO.corredor, { n: corredor.length }));
   }, [running, calling, person, corredor.length]);
 
   /* Se ninguém chegou ainda, a seção espera: o relógio pula para a hora de
@@ -110,25 +171,63 @@ export default function App() {
 
   /* ------------------------------------------------------------ o turno -- */
 
-  /* A fila do dia inteiro é montada aqui, antes da primeira pessoa entrar. */
+  const clearActivity = useCallback(() => {
+    clearTimeout(cabinaTimer.current);
+    clearTimeout(leaveTimer.current);
+    clearTimeout(toastTimer.current);
+    setLeaving(null);
+    setToast("");
+    setLive("");
+  }, []);
+
+  const newGame = useCallback(() => {
+    clearActivity();
+    const novo = makeShift(PINNED);
+    setShift(novo);
+    setState({ ...initialState, phase: "start", waiting: novo.people.map((_, i) => i) });
+    setC(newCase());
+    setTutor(null);
+    setSignatures({});
+    setSaved(null);
+    deskRef.current?.restore(SPOTS);
+    tone("ok");
+  }, [clearActivity]);
+
+  const returnToMenu = useCallback(() => {
+    clearActivity();
+    if (SAVABLE_PHASES.includes(phase)) {
+      setStorageError(!writeSave(snapshot({ shift, state, c, signatures, tutor, spots: deskRef.current?.spots ?? SPOTS })));
+      setSaved(readSave());
+    } else if (["end", "bad"].includes(phase)) setSaved(null);
+    else setSaved(readSave());
+    setTutor(null);
+    setState((s) => ({ ...s, phase: "menu" }));
+  }, [clearActivity, phase, shift, state, c, signatures, tutor]);
+
+  const loadGame = useCallback(() => {
+    const loaded = readSave();
+    setSaved(loaded);
+    if (!loaded) return;
+    clearActivity();
+    setShift(loaded.shift);
+    setState(loaded.state);
+    setC(loaded.c);
+    setSignatures(loaded.signatures);
+    setTutor(loaded.state.phase === "tutorial" ? loaded.tutor : null);
+    restoreSpots.current = { ...SPOTS, ...loaded.spots };
+    tone("ok");
+  }, [clearActivity]);
+
   const open = useCallback(() => {
     tone("ok");
-    const novo = PINNED ? null : makeShift();
-    if (novo) setShift(novo);
-    setState({
-      ...initialState,
-      phase: "opening",
-      waiting: (novo ?? shift).people.map((_, i) => i),
-    });
-    setC(newCase());
-    setSignatures({});
-  }, [shift]);
+    setState((s) => ({ ...s, phase: "opening" }));
+  }, []);
 
   /* Impressa a zerésima, quem entra na sala é a coordenadora. */
   const start = useCallback(() => {
     setState((s) => ({ ...s, phase: "tutorial" }));
     setC(newCase());
-    setTutor({ i: 0, log: PASSOS[0].fala.map((texto) => ({ texto })) });
+    setTutor({ i: 0, log: t(PASSOS[0].fala).map((texto) => ({ texto })) });
   }, []);
 
   const abrirPorta = useCallback(() => {
@@ -146,20 +245,20 @@ export default function App() {
   /* Andar no roteiro: o que a mesa respondeu entra na conversa antes das falas
      do passo seguinte. `alvo` é um índice ou o `id` de um passo. */
   const tutorIr = useCallback((alvo, minha) => {
-    setTutor((t) => {
-      if (!t) return t;
+    setTutor((atual) => {
+      if (!atual) return atual;
       const i = typeof alvo === "number" ? alvo : indiceDe(alvo);
-      if (i < 0 || i >= PASSOS.length) return t;
-      const log = [...t.log];
+      if (i < 0 || i >= PASSOS.length) return atual;
+      const log = [...atual.log];
       if (minha) log.push({ own: true, texto: minha });
-      for (const texto of PASSOS[i].fala) log.push({ texto });
+      for (const texto of t(PASSOS[i].fala)) log.push({ texto });
       return { i, log };
     });
   }, []);
 
   const tutorEscolha = useCallback(
     (op) => {
-      if (op.vai) tutorIr(op.vai, op.diz);
+      if (op.vai) tutorIr(op.vai, t(op.diz));
       else fecharTutorial();
     },
     [tutorIr, fecharTutorial],
@@ -186,34 +285,33 @@ export default function App() {
       if (phase !== "chamando" || !corredor.includes(i)) return;
       const issue = queueIssue(people, corredor, i);
       tone(issue ? "error" : "beep");
-      if (issue) say(`Ocorrência na fila: ${issue}`);
+      if (issue) say(t(AVISO.filaOcorrencia, { aviso: issue }));
       setLeaving(i);
       clearTimeout(leaveTimer.current);
       leaveTimer.current = setTimeout(() => {
         setLeaving(null);
         setState((s) => ({ ...s, waiting: s.waiting.filter((x) => x !== i) }));
       }, SAINDO_MS);
-      setState((s) => ({
-        ...s,
-        phase: "working",
-        index: i,
-        errors: s.errors + Number(!!issue),
-        clock: Math.max(s.clock, emMinutos(people[i].time)),
-      }));
+      setState((s) => {
+        if (s.phase !== "chamando") return s;
+        const next = { ...s, phase: "working", index: i, clock: Math.max(s.clock, emMinutos(people[i].time)) };
+        return issue ? recordError(next) : next;
+      });
       setC({ ...newCase(), queueIssue: issue });
     },
     [phase, corredor, people, say],
   );
 
-  /* Atalho de desenvolvimento: encerra o dia com tudo resolvido, para poder
-     olhar o boletim sem jogar os doze atendimentos. */
+  /* Atalho disponível só no desenvolvimento: permite revisar o fechamento. */
   const skipToEnd = useCallback(() => {
     clearTimeout(cabinaTimer.current);
+    clearTimeout(leaveTimer.current);
+    setLeaving(null);
     setC(newCase());
     setTutor(null);
     setState((s) => ({
       ...s,
-      phase: "end",
+      phase: "closing",
       waiting: [],
       served: total,
       correct: total,
@@ -227,7 +325,12 @@ export default function App() {
   const next = useCallback(() => {
     clearTimeout(cabinaTimer.current);
     setC(newCase());
-    setState((s) => ({ ...s, phase: s.waiting.length ? "chamando" : "end", result: null }));
+    setState(afterFeedback);
+  }, []);
+
+  const finishDay = useCallback(() => {
+    tone("ok");
+    setState((s) => s.phase === "closing" ? { ...s, phase: "end" } : s);
   }, []);
 
   /* Fecha o atendimento: julga a saída escolhida e abre o retorno. */
@@ -239,29 +342,7 @@ export default function App() {
       const v = withQueueIssue(decision, c.queueIssue);
       tone(v.right ? "ok" : "error");
 
-      setState((s) => {
-        const list = s.marks.slice();
-        list[s.index] = v.right ? "ok" : "err";
-        // A ocorrência da chamada já entrou no contador. Só uma decisão
-        // incorreta durante o atendimento acrescenta outra ocorrência.
-        const nextErrors = s.errors + Number(!decision.right);
-        return {
-          ...s,
-          phase: "feedback",
-          clock: s.clock + v.minutes,
-          served: s.served + 1,
-          correct: v.right ? s.correct + 1 : s.correct,
-          errors: nextErrors,
-          marks: list,
-          result: {
-            right: v.right,
-            title: v.title,
-            stamp: v.stamp,
-            text: v.text,
-            meta: `Tempo de mesa: ${v.minutes} min · Ocorrências: ${pad(nextErrors, 2)}`,
-          },
-        };
-      });
+      setState((s) => finishCase(s, decision, v, c.voted));
     },
     [running, person, c],
   );
@@ -303,14 +384,14 @@ export default function App() {
         const year = person.reg.birth.slice(-4);
         if (c.typed === year) {
           tone("ok");
-          say("Ano confere. A pessoa assina o caderno.");
+          say(t(AVISO.anoConfere));
           setC((x) => ({ ...x, typed: "", refused: "", biografica: true, step: "assinatura" }));
         } else if (c.typed.length < 4) {
-          setC((x) => ({ ...x, refused: "ANO INCOMPLETO" }));
+          setC((x) => ({ ...x, refused: t(AVISO.anoIncompleto) }));
         } else {
           tone("error");
-          say("O ano não confere com o cadastro.");
-          setC((x) => ({ ...x, typed: "", refused: "ANO NÃO CONFERE", step: "decisao" }));
+          say(t(AVISO.anoErrado));
+          setC((x) => ({ ...x, typed: "", refused: t(AVISO.anoNaoConfere), step: "decisao" }));
         }
         return;
       }
@@ -318,10 +399,10 @@ export default function App() {
       if (c.typed === person.doc.code) {
         tone("ok");
         setC((x) => ({ ...x, typed: "", refused: "", loaded: true, step: "caderno" }));
-        say("Registro na tela. Agora o caderno.");
+        say(t(AVISO.registroNaTela));
       } else {
         tone("error");
-        setC((x) => ({ ...x, typed: "", refused: "REGISTRO NÃO ENCONTRADO" }));
+        setC((x) => ({ ...x, typed: "", refused: t(AVISO.registroNaoEncontrado) }));
       }
     },
     [running, person, c.step, c.typed, say],
@@ -331,7 +412,7 @@ export default function App() {
     (row) => {
       if (!gate("caderno")) return;
       if (row.name !== person.reg.name) {
-        say("Esse não é o nome que está no terminal.");
+        say(t(AVISO.outroNome));
         return;
       }
       tone("ok");
@@ -358,18 +439,18 @@ export default function App() {
 
     if (reading === "ok") {
       tone("ok");
-      say("Digital reconhecida.");
+      say(t(AVISO.digitalOk));
       setC((x) => ({ ...x, tries, bio: "ok", step: "cabina" }));
       return;
     }
 
     tone("error");
     if (tries >= 4) {
-      say("Quatro tentativas e nada. Pergunte o ano de nascimento.");
+      say(t(AVISO.digitalEsgotada));
       setC((x) => ({ ...x, tries, bio: "esgotada", step: "ano" }));
       return;
     }
-    say(`Digital não reconhecida — tentativa ${tries} de 4.`);
+    say(t(AVISO.digitalFalhou, { n: tries }));
     setC((x) => ({ ...x, tries, bio: "fail" }));
   }, [gate, person, c.tries, say]);
 
@@ -419,7 +500,7 @@ export default function App() {
     (name) => {
       if (!person) return;
       if (name !== person.reg.name) {
-        say("Esse não é o nome que está no terminal.");
+        say(t(AVISO.outroNome));
         return;
       }
       tone("ok");
@@ -449,7 +530,8 @@ export default function App() {
         asked: q.marca === "asked" ? true : x.asked,
         perguntadas: x.perguntadas.includes(id) ? x.perguntadas : [...x.perguntadas, id],
         aberto: [...new Set([...x.aberto, ...(q.abre ?? [])])],
-        dialogo: [...x.dialogo, { id, mesa: q.fala ?? q.label, pessoa: dita }],
+        // A conversa guarda texto, não par: é registro do que foi dito.
+        dialogo: [...x.dialogo, { id, mesa: t(q.fala ?? q.label), pessoa: dita }],
       }));
     },
     [running, person],
@@ -461,12 +543,12 @@ export default function App() {
     cabinaTimer.current = setTimeout(() => {
       if (person.quits) {
         tone("error");
-        say("A pessoa saiu da cabina sem votar.");
+        say(t(AVISO.saiuSemVotar));
         setC((x) => ({ ...x, step: "decisao" }));
         return;
       }
       tone("vote");
-      say("Voto computado.");
+      say(t(AVISO.votoComputado));
       firmar(person);
       setC((x) => ({ ...x, voted: true, step: "entrega" }));
     }, CABINA_MS);
@@ -524,12 +606,35 @@ export default function App() {
     if (Object.keys(patch).length) desk.reset(patch);
   }, [c.docBack, c.receipt, c.given, desk.reset]);
 
+  // Restaura depois dos efeitos de chegada, que normalmente arrumam a mesa.
+  useEffect(() => {
+    if (!restoreSpots.current) return;
+    desk.restore(restoreSpots.current);
+    restoreSpots.current = null;
+  });
+
+  useEffect(() => {
+    if (["end", "bad"].includes(phase)) {
+      clearSave();
+      setSaved(null);
+      return;
+    }
+    if (!SAVABLE_PHASES.includes(phase)) return;
+    setStorageError(!writeSave(snapshot({ shift, state, c, signatures, tutor, spots: desk.spots })));
+  }, [phase, shift, state, c, signatures, tutor, desk.spots]);
+
   /* ----------------------------------------------------------- teclado -- */
 
   useEffect(() => {
     const onKeyDown = (e) => {
       if (e.defaultPrevented || e.target.closest?.(".biometric-hand")) return;
       if (e.metaKey || e.ctrlKey || e.altKey) return;
+
+      if (e.key === "Escape" && ["tutorial", "chamando", "working", "feedback"].includes(phase)) {
+        e.preventDefault();
+        returnToMenu();
+        return;
+      }
 
       if (phase === "feedback" && (e.key === "Enter" || e.key === " ")) {
         e.preventDefault();
@@ -564,7 +669,7 @@ export default function App() {
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [phase, next, onKey, onRead, onAction]);
+  }, [phase, next, onKey, onRead, onAction, returnToMenu]);
 
   const on = useMemo(
     () => ({
@@ -583,7 +688,7 @@ export default function App() {
 
   return (
     <>
-      <main className="app" inert={phase === "start" || phase === "opening"}>
+      {!["splash", "menu", "start"].includes(phase) && <main className="app" inert={["opening", "feedback", "closing", "end", "bad"].includes(phase)}>
         <TopBar
           time={hora}
           crowd={crowd}
@@ -596,7 +701,8 @@ export default function App() {
           errors={errors}
           total={total}
           marks={marks}
-          onSkip={skipToEnd}
+          onSkip={import.meta.env.DEV ? skipToEnd : undefined}
+          onMenu={returnToMenu}
           foco={foco}
         />
 
@@ -614,7 +720,6 @@ export default function App() {
           />
           <Desk
             person={person}
-            calling={calling}
             c={c}
             ledger={shift.ledger}
             signatures={signatures}
@@ -624,10 +729,9 @@ export default function App() {
             on={on}
             running={running}
             foco={foco}
-            objetivo={passo?.objetivo}
           />
         </div>
-      </main>
+      </main>}
 
       <div className={toast ? "toast show" : "toast"} role="status">
         {toast || "—"}
@@ -636,13 +740,16 @@ export default function App() {
         {live}
       </p>
 
+      {phase === "splash" && <StudioIntro onFinish={returnToMenu} />}
+      {phase === "menu" && <GameMenu canLoad={!!saved} onNew={newGame} onLoad={loadGame} storageError={storageError} />}
       {phase === "start" && <StartModal onStart={open} />}
       {phase === "opening" && <OpeningModal seedText={shift.seed} onStart={start} />}
       {phase === "feedback" && result && (
         <FeedbackModal result={result} last={waiting.length === 0} onNext={next} />
       )}
-      {phase === "end" && (
-        <EndModal served={served} correct={correct} errors={errors} total={total} seed={shift.seed} onRestart={open} />
+      {phase === "closing" && <Closing seedText={shift.seed} votes={state.votes} onFinish={finishDay} />}
+      {["end", "bad"].includes(phase) && (
+        <Ending bad={phase === "bad"} onMenu={returnToMenu} />
       )}
     </>
   );

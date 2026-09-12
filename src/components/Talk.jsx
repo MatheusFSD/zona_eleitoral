@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useId, useRef, useState } from "react";
 
 import { PERGUNTAS, disponiveis } from "../data/talk.js";
+import { TXT, t } from "../i18n.js";
 
 function Bubble({ own = false, children }) {
   return (
     <div className={`chat-bubble${own ? " own" : ""}`}>
-      <span className="chat-speaker">{own ? "Você · mesa" : "Eleitor"}</span>
+      <span className="chat-speaker">{t(own ? TXT.voceMesa : TXT.eleitor)}</span>
       <p>{children}</p>
     </div>
   );
@@ -61,8 +62,8 @@ export default function Talk({ person, c, onAsk }) {
 
   return (
     <div className="conversa">
-      <div className="dito" data-nodrag ref={fim} role="log" aria-label="Conversa na mesa" aria-live="polite" aria-relevant="additions">
-        <Bubble>{person.line}</Bubble>
+      <div className="dito" data-nodrag ref={fim} role="log" aria-label={t(TXT.conversaNaMesa)} aria-live="polite" aria-relevant="additions">
+        <Bubble>{t(person.line)}</Bubble>
 
         {(c.dialogo ?? []).map((troca, i) => (
           <Exchange key={`${troca.id}-${i}`} troca={troca} animate={i >= initialCount.current} onReveal={scroll} onDone={done} />
@@ -75,7 +76,7 @@ export default function Talk({ person, c, onAsk }) {
           onPointerLeave={() => setOpen(false)}
           onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false); }}
           onKeyDown={(event) => { if (event.key === "Escape") { setOpen(false); event.stopPropagation(); } }}>
-          <button type="button" className="chat-reply-icon" aria-label="Responder ao eleitor" aria-expanded={open && !busy} aria-controls={menuId} disabled={busy}
+          <button type="button" className="chat-reply-icon" aria-label={t(TXT.responderEleitor)} aria-expanded={open && !busy} aria-controls={menuId} disabled={busy}
             onFocus={(event) => { if (event.currentTarget.matches(":focus-visible")) setOpen(true); }}
             onClick={() => setOpen(true)}>
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 4h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-8l-6 4v-4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2Z" /><path d="M8 9h8M8 13h5" /></svg>
@@ -84,7 +85,7 @@ export default function Talk({ person, c, onAsk }) {
           <div className="perguntas">
           {abertas.map((id) => (
             <button key={id} type="button" className="pergunta" onClick={() => ask(id)}>
-              <span>{PERGUNTAS[id].label}</span><span className="chat-send" aria-hidden="true">↗</span>
+              <span>{t(PERGUNTAS[id].label)}</span><span className="chat-send" aria-hidden="true">↗</span>
             </button>
           ))}
           </div>

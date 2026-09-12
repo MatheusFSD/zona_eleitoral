@@ -1,4 +1,25 @@
 import { useState } from "react";
+import { TXT, t } from "../../i18n.js";
+
+/* O que está impresso na folha do caderno. O nome da escola fica como está. */
+const FOLHA = {
+  cabeca: { pt: "ESCOLA MUNICIPAL HORIZONTE · ZONA 041", en: "ESCOLA MUNICIPAL HORIZONTE · ZONE 041" },
+  secao: { pt: "Seção 127", en: "Section 127" },
+  numero: { pt: "Nº", en: "No." },
+  nome: { pt: "Nome", en: "Name" },
+  nascimento: { pt: "Nascimento", en: "Date of birth" },
+  assinatura: { pt: "Assinatura", en: "Signature" },
+  marcarLinha: { pt: "Marcar esta linha", en: "Mark this line" },
+  assinar: { pt: "assinar", en: "sign" },
+  folhaDe: { pt: "Folha {n} de {total}", en: "Sheet {n} of {total}" },
+  faixa: { pt: "Nº {de}–{ate}", en: "No. {de}–{ate}" },
+  semRegistros: { pt: "Sem registros", en: "No entries" },
+  folhaAnterior: { pt: "Folha anterior", en: "Previous sheet" },
+  virarAnterior: { pt: "Virar para a folha anterior", en: "Turn back a sheet" },
+  proximaFolha: { pt: "Próxima folha", en: "Next sheet" },
+  virarProxima: { pt: "Virar para a próxima folha", en: "Turn to the next sheet" },
+  dica: { pt: "Levante o canto para passar a folha", en: "Lift the corner to turn the sheet" },
+};
 
 const PAGE_SIZE = 6;
 
@@ -39,10 +60,10 @@ export default function Caderno({ ledger, c, signatures, onRow, onSign }) {
         onAnimationEnd={(event) => {
           if (moving && event.target === event.currentTarget) { setPage(current + turn); setTurn(0); }
         }}>
-      <div className="book-kicker">ESCOLA MUNICIPAL HORIZONTE · ZONA 041</div>
+      <div className="book-kicker">{t(FOLHA.cabeca)}</div>
       <header className="book-head">
-        <strong>Caderno de votação</strong>
-        <span>Seção 127</span>
+        <strong>{t(TXT.cadernoVotacao)}</strong>
+        <span>{t(FOLHA.secao)}</span>
       </header>
 
       <div className="book-rolo" data-nodrag>
@@ -55,10 +76,10 @@ export default function Caderno({ ledger, c, signatures, onRow, onSign }) {
           </colgroup>
           <thead>
             <tr>
-              <th>Nº</th>
-              <th>Nome</th>
-              <th>Nascimento</th>
-              <th>Assinatura</th>
+              <th>{t(FOLHA.numero)}</th>
+              <th>{t(FOLHA.nome)}</th>
+              <th>{t(FOLHA.nascimento)}</th>
+              <th>{t(FOLHA.assinatura)}</th>
             </tr>
           </thead>
           <tbody>
@@ -74,7 +95,7 @@ export default function Caderno({ ledger, c, signatures, onRow, onSign }) {
                       className="linha"
                       onClick={() => onRow(row)}
                       disabled={!marking && !marked}
-                      title={marking ? "Marcar esta linha" : undefined}
+                      title={marking ? t(FOLHA.marcarLinha) : undefined}
                     >
                       {row.name}
                     </button>
@@ -85,7 +106,7 @@ export default function Caderno({ ledger, c, signatures, onRow, onSign }) {
                       <span className={`firma m${firma.hand}`}>{firma.name}</span>
                     ) : marked && signing ? (
                       <button className="assinar" onClick={onSign}>
-                        assinar
+                        {t(FOLHA.assinar)}
                       </button>
                     ) : marked ? (
                       <span className="visto">✓</span>
@@ -98,20 +119,20 @@ export default function Caderno({ ledger, c, signatures, onRow, onSign }) {
         </table>
       </div>
       <footer className="book-pages" data-nodrag>
-        <button type="button" className="page-corner previous" onClick={() => flip(-1)} disabled={!!turn || current === 0} aria-label="Folha anterior" title="Virar para a folha anterior" />
+        <button type="button" className="page-corner previous" onClick={() => flip(-1)} disabled={!!turn || current === 0} aria-label={t(FOLHA.folhaAnterior)} title={t(FOLHA.virarAnterior)} />
         <span aria-live="polite">
-          <b>Folha {index + 1} de {pages}</b>
-          <small>{rows.length ? `Nº ${rows[0].seq}–${rows.at(-1).seq}` : "Sem registros"}</small>
+          <b>{t(FOLHA.folhaDe, { n: index + 1, total: pages })}</b>
+          <small>{rows.length ? t(FOLHA.faixa, { de: rows[0].seq, ate: rows.at(-1).seq }) : t(FOLHA.semRegistros)}</small>
         </span>
-        <button type="button" className="page-corner next" onClick={() => flip(1)} disabled={!!turn || current === pages - 1} aria-label="Próxima folha" title="Virar para a próxima folha" />
+        <button type="button" className="page-corner next" onClick={() => flip(1)} disabled={!!turn || current === pages - 1} aria-label={t(FOLHA.proximaFolha)} title={t(FOLHA.virarProxima)} />
       </footer>
-      <span className="book-gesture-hint">Levante o canto para passar a folha</span>
+      <span className="book-gesture-hint">{t(FOLHA.dica)}</span>
       </div>
     );
   };
 
   return (
-    <section className="book" aria-label="Caderno de votação" aria-busy={!!turn}>
+    <section className="book" aria-label={t(TXT.cadernoVotacao)} aria-busy={!!turn}>
       {sheet(turn > 0 ? current + turn : current)}
       {!!turn && sheet(turn > 0 ? current : current + turn, true)}
     </section>

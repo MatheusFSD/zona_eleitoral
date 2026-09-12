@@ -55,17 +55,31 @@ const slug = (text) =>
    é perguntar os dados à pessoa, `list` é consultar a listagem de impedidos.
 
    `hard` só ordena o dia: os casos claros de manhã, as exceções à tarde. */
+
+/* A linha de situação do terminal. `ok` marca o que a mesa pode habilitar sem
+   pensar duas vezes; o resto acende o aviso na tela. */
+const STATUS = {
+  regular: { pt: "REGULAR", en: "REGULAR", ok: true },
+  prioridade: { pt: "REGULAR · PRIORIDADE", en: "REGULAR · PRIORITY", ok: true },
+  duvidosa: { pt: "FOTO DUVIDOSA", en: "PHOTO IN DOUBT" },
+  ja_votou: { pt: "JÁ VOTOU", en: "ALREADY VOTED" },
+  divergente: { pt: "LOCAL DIVERGENTE", en: "WRONG POLLING PLACE" },
+  impedido: { pt: "CADASTRO IMPEDIDO", en: "REGISTRATION BARRED" },
+  fora: { pt: "SEM REGISTRO NA SEÇÃO", en: "NOT IN THIS SECTION" },
+  outro_municipio: { pt: "OUTRO MUNICÍPIO", en: "ANOTHER TOWN" },
+};
+
 const KINDS = {
-  comum: { group: "fluxo", hard: 0, resolve: "fluxo", bio: ["ok"], status: "REGULAR" },
-  digital: { group: "fluxo", hard: 1, resolve: "fluxo", bio: ["ok"], status: "REGULAR", doc: "digital" },
-  prioridade: { group: "fluxo", hard: 1, resolve: "fluxo", bio: ["ok"], status: "REGULAR · PRIORIDADE", age: "old" },
-  retry: { group: "fluxo", hard: 2, resolve: "fluxo", bio: ["fail", "ok"], status: "REGULAR" },
+  comum: { group: "fluxo", hard: 0, resolve: "fluxo", bio: ["ok"], status: STATUS.regular },
+  digital: { group: "fluxo", hard: 1, resolve: "fluxo", bio: ["ok"], status: STATUS.regular, doc: "digital" },
+  prioridade: { group: "fluxo", hard: 1, resolve: "fluxo", bio: ["ok"], status: STATUS.prioridade, age: "old" },
+  retry: { group: "fluxo", hard: 2, resolve: "fluxo", bio: ["fail", "ok"], status: STATUS.regular },
   biografica: {
     group: "fluxo",
     hard: 3,
     resolve: "fluxo",
     bio: ["fail", "fail", "fail", "fail"],
-    status: "REGULAR",
+    status: STATUS.regular,
     year: "ok",
   },
   duvida_ok: {
@@ -73,23 +87,23 @@ const KINDS = {
     hard: 3,
     resolve: "fluxo",
     bio: ["ok"],
-    status: "FOTO DUVIDOSA",
+    status: STATUS.duvidosa,
     needs: { ask: true },
     answer: "ok",
     typo: true,
   },
 
-  ja_votou: { group: "encaminhar", hard: 1, resolve: "encaminhar", bio: ["ok"], status: "JÁ VOTOU" },
-  outra_secao: { group: "encaminhar", hard: 1, resolve: "encaminhar", bio: ["ok"], status: "LOCAL DIVERGENTE" },
-  impedido: { group: "encaminhar", hard: 2, resolve: "encaminhar", bio: ["ok"], status: "CADASTRO IMPEDIDO" },
-  sem_foto: { group: "encaminhar", hard: 2, resolve: "encaminhar", bio: ["ok"], status: "REGULAR", doc: "certidao", age: "young" },
-  embriagado: { group: "encaminhar", hard: 2, resolve: "encaminhar", bio: ["ok"], status: "REGULAR", drunk: true },
+  ja_votou: { group: "encaminhar", hard: 1, resolve: "encaminhar", bio: ["ok"], status: STATUS.ja_votou },
+  outra_secao: { group: "encaminhar", hard: 1, resolve: "encaminhar", bio: ["ok"], status: STATUS.divergente },
+  impedido: { group: "encaminhar", hard: 2, resolve: "encaminhar", bio: ["ok"], status: STATUS.impedido },
+  sem_foto: { group: "encaminhar", hard: 2, resolve: "encaminhar", bio: ["ok"], status: STATUS.regular, doc: "certidao", age: "young" },
+  embriagado: { group: "encaminhar", hard: 2, resolve: "encaminhar", bio: ["ok"], status: STATUS.regular, drunk: true },
   ano_errado: {
     group: "encaminhar",
     hard: 3,
     resolve: "encaminhar",
     bio: ["fail", "fail", "fail", "fail"],
-    status: "REGULAR",
+    status: STATUS.regular,
     year: "erro",
   },
   fora_caderno: {
@@ -97,7 +111,7 @@ const KINDS = {
     hard: 3,
     resolve: "encaminhar",
     bio: ["ok"],
-    status: "SEM REGISTRO NA SEÇÃO",
+    status: STATUS.fora,
     ledger: false,
     needs: { list: true },
   },
@@ -107,7 +121,7 @@ const KINDS = {
     hard: 2,
     resolve: "justificar",
     bio: ["ok"],
-    status: "OUTRO MUNICÍPIO",
+    status: STATUS.outro_municipio,
     ledger: false,
     other: true,
   },
@@ -116,16 +130,20 @@ const KINDS = {
     hard: 3,
     resolve: "juiz",
     bio: ["ok"],
-    status: "FOTO DUVIDOSA",
+    status: STATUS.duvidosa,
     needs: { ask: true },
     answer: "erro",
     typo: true,
   },
-  desistiu: { group: "excecao", hard: 3, resolve: "suspender", bio: ["ok"], status: "REGULAR", quits: true },
+  desistiu: { group: "excecao", hard: 3, resolve: "suspender", bio: ["ok"], status: STATUS.regular, quits: true },
 };
 
 /* Falas e etiquetas servem para qualquer pessoa: o sexo do sorteio só decide
-   nome, cabelo e barba, então nada aqui pode ter gênero preso. */
+   nome, cabelo e barba, então nada aqui pode ter gênero preso.
+
+   As etiquetas não vão à tela hoje — o nome e a descrição saíram do painel da
+   pessoa, porque ler o documento é trabalho da mesa. Por isso elas seguem só
+   em português; o que aparece no jogo está nos dois idiomas. */
 const TAGS = {
   comum: ["Chegou com o documento na mão", "Fila comum", "Cumprimenta e espera", "Não parece com pressa"],
   digital: ["Celular na mão", "Documento no aplicativo", "Mostra a tela antes de pedirem"],
@@ -145,113 +163,271 @@ const TAGS = {
   desistiu: ["Olha muito para o relógio", "Recebeu uma ligação na fila", "Parece querer ir embora"],
 };
 
+/* A fala de chegada, nos dois idiomas. As duas listas de um arquétipo andam
+   juntas: o sorteio escolhe a posição, não a frase, então o mesmo turno diz a
+   mesma coisa em português e em inglês. */
 const LINES = {
-  comum: [
-    "Bom dia. É aqui mesmo, né? Prometo que não demoro.",
-    "Documento aqui, ó. Pode conferir com calma.",
-    "Boa tarde. Primeira vez que voto sem fila na rua.",
-    "Cheguei cedo justamente para não pegar movimento.",
-  ],
-  digital: [
-    "Meu documento está no aplicativo oficial. Depois eu já guardo o celular.",
-    "Está aqui na tela — é o aplicativo do governo mesmo, pode olhar.",
-    "Eu não trago mais o de papel. Vale esse aqui, né?",
-  ],
-  prioridade: [
-    "Essa foto é do tempo em que meu cabelo ainda obedecia.",
-    "Me disseram que eu passo na frente. Não quero atrapalhar ninguém.",
-    "Voto nessa escola desde antes de você nascer.",
-  ],
-  retry: [
-    "Minha mão está gelada da rua. Deixa eu esfregar aqui primeiro.",
-    "Sempre pega na segunda. Não se assuste se der errado agora.",
-    "Esse leitor implica comigo. Tenta de novo que vai.",
-  ],
-  biografica: [
-    "Minha digital nunca pega. Pode tentar, mas vai dar trabalho.",
-    "Trabalho com massa o dia inteiro. Não sobra digital nenhuma.",
-    "No banco também não pega. Já é assim faz anos.",
-  ],
-  duvida_ok: [
-    "Eu sei que a foto está velha, mas sou eu. Pode perguntar o que quiser.",
-    "Erraram meu nome na hora de digitar. Isso não pode travar tudo.",
-    "É só uma letra. Você está vendo que sou eu.",
-  ],
-  ja_votou: [
-    "Tem como agilizar? Eu deixei o carro num lugar meio complicado.",
-    "Eu só preciso assinar e ir embora, já está quase tudo feito.",
-    "Rapidinho, por favor. Estou em cima da hora no trabalho.",
-  ],
-  outra_secao: [
-    "Sempre votei nessa sala. Não tem como minha seção ser outra.",
-    "Mudei de casa, mas continuo votando aqui. Sempre foi aqui.",
-    "Olha, o cartaz lá fora não diz nada. Eu entrei na primeira porta.",
-  ],
-  impedido: [
-    "Só preciso votar e ir embora. Está tudo aí no sistema.",
-    "Deve estar tudo certo. Faz tempo que eu resolvi aquilo.",
-    "Se aparecer alguma coisa na tela, é engano. Pode liberar.",
-  ],
-  sem_foto: [
-    "Eu trouxe o documento, mas ele não tem foto. Serve mesmo assim?",
-    "É a primeira vez que voto. Minha mãe disse que era só levar isso.",
-    "Só tenho esse papel. Ninguém falou que precisava de foto.",
-  ],
-  embriagado: [
-    "Eu tô ótimo, moço. Foi só uma cervejinha no almoço.",
-    "Deixa eu votar rapidinho que eu já saio, tá?",
-    "Não precisa disso tudo. Eu sei votar de olho fechado.",
-  ],
-  ano_errado: [
-    "Nasci em... deixa eu ver. Sempre me atrapalho com isso.",
-    "Essa data aí nunca bateu com a minha. Vive dando problema.",
-    "Ano de nascimento? Ih, eu sempre erro na hora de falar.",
-  ],
-  fora_caderno: [
-    "Procurei meu nome no cartaz lá fora e não achei.",
-    "Mudei de endereço faz pouco tempo. Será que é por isso?",
-    "Eu votei aqui na outra eleição, tenho certeza.",
-  ],
-  justifica: [
-    "Eu não voto aqui, estou de passagem. Dá para justificar?",
-    "Vim trabalhar nessa cidade e não deu para voltar.",
-    "Meu título é de outro município. Vim resolver isso aqui.",
-  ],
-  duvida_juiz: [
-    "Sou eu, claro que sou eu. Não precisa ficar olhando tanto.",
-    "Essa foto está ruim, mas todo mundo me reconhece.",
-    "Perguntar o quê? Eu não decorei esses dados de cabeça.",
-  ],
-  desistiu: [
-    "Se demorar muito eu vou ter que voltar depois, viu?",
-    "Estou com pouco tempo, mas vamos lá.",
-    "Deixa eu ver se dá tempo. Estou esperando uma ligação.",
-  ],
+  comum: {
+    pt: [
+      "Bom dia. É aqui mesmo, né? Prometo que não demoro.",
+      "Documento aqui, ó. Pode conferir com calma.",
+      "Boa tarde. Primeira vez que voto sem fila na rua.",
+      "Cheguei cedo justamente para não pegar movimento.",
+    ],
+    en: [
+      "Morning. This is the right room, isn't it? I promise I'll be quick.",
+      "Here's my ID. Take your time with it.",
+      "Afternoon. First time I've voted without a line out on the street.",
+      "I came early exactly so I wouldn't hit the crowd.",
+    ],
+  },
+  digital: {
+    pt: [
+      "Meu documento está no aplicativo oficial. Depois eu já guardo o celular.",
+      "Está aqui na tela — é o aplicativo do governo mesmo, pode olhar.",
+      "Eu não trago mais o de papel. Vale esse aqui, né?",
+    ],
+    en: [
+      "My ID is in the official app. I'll put the phone away right after.",
+      "It's here on the screen — the government app itself, have a look.",
+      "I don't carry the paper one anymore. This one counts, right?",
+    ],
+  },
+  prioridade: {
+    pt: [
+      "Essa foto é do tempo em que meu cabelo ainda obedecia.",
+      "Me disseram que eu passo na frente. Não quero atrapalhar ninguém.",
+      "Voto nessa escola desde antes de você nascer.",
+    ],
+    en: [
+      "That photo is from back when my hair still behaved.",
+      "They told me I go ahead of the line. I don't want to be in anyone's way.",
+      "I've voted at this school since before you were born.",
+    ],
+  },
+  retry: {
+    pt: [
+      "Minha mão está gelada da rua. Deixa eu esfregar aqui primeiro.",
+      "Sempre pega na segunda. Não se assuste se der errado agora.",
+      "Esse leitor implica comigo. Tenta de novo que vai.",
+    ],
+    en: [
+      "My hand is freezing from outside. Let me rub it first.",
+      "It always takes on the second try. Don't be alarmed if this one fails.",
+      "That reader has something against me. Try again, it'll work.",
+    ],
+  },
+  biografica: {
+    pt: [
+      "Minha digital nunca pega. Pode tentar, mas vai dar trabalho.",
+      "Trabalho com massa o dia inteiro. Não sobra digital nenhuma.",
+      "No banco também não pega. Já é assim faz anos.",
+    ],
+    en: [
+      "My fingerprint never reads. You can try, but it'll be a struggle.",
+      "I work with cement all day. There's no fingerprint left.",
+      "It doesn't read at the bank either. It's been like this for years.",
+    ],
+  },
+  duvida_ok: {
+    pt: [
+      "Eu sei que a foto está velha, mas sou eu. Pode perguntar o que quiser.",
+      "Erraram meu nome na hora de digitar. Isso não pode travar tudo.",
+      "É só uma letra. Você está vendo que sou eu.",
+    ],
+    en: [
+      "I know the photo is old, but it's me. Ask me anything you like.",
+      "They mistyped my name. That can't hold up everything.",
+      "It's one letter. You can see it's me.",
+    ],
+  },
+  ja_votou: {
+    pt: [
+      "Tem como agilizar? Eu deixei o carro num lugar meio complicado.",
+      "Eu só preciso assinar e ir embora, já está quase tudo feito.",
+      "Rapidinho, por favor. Estou em cima da hora no trabalho.",
+    ],
+    en: [
+      "Any way to speed this up? I parked somewhere awkward.",
+      "I just need to sign and go, it's nearly all done.",
+      "Quick, please. I'm cutting it close for work.",
+    ],
+  },
+  outra_secao: {
+    pt: [
+      "Sempre votei nessa sala. Não tem como minha seção ser outra.",
+      "Mudei de casa, mas continuo votando aqui. Sempre foi aqui.",
+      "Olha, o cartaz lá fora não diz nada. Eu entrei na primeira porta.",
+    ],
+    en: [
+      "I've always voted in this room. There's no way my section is another one.",
+      "I moved house, but I still vote here. It's always been here.",
+      "Look, the notice outside says nothing. I came in the first door.",
+    ],
+  },
+  impedido: {
+    pt: [
+      "Só preciso votar e ir embora. Está tudo aí no sistema.",
+      "Deve estar tudo certo. Faz tempo que eu resolvi aquilo.",
+      "Se aparecer alguma coisa na tela, é engano. Pode liberar.",
+    ],
+    en: [
+      "I just need to vote and go. It's all there in the system.",
+      "It should all be in order. I sorted that out a long time ago.",
+      "If anything shows up on the screen, it's a mistake. Go ahead and clear me.",
+    ],
+  },
+  sem_foto: {
+    pt: [
+      "Eu trouxe o documento, mas ele não tem foto. Serve mesmo assim?",
+      "É a primeira vez que voto. Minha mãe disse que era só levar isso.",
+      "Só tenho esse papel. Ninguém falou que precisava de foto.",
+    ],
+    en: [
+      "I brought my document, but it has no photo. Does it still work?",
+      "It's my first time voting. My mother said this was all I needed.",
+      "This paper is all I have. Nobody said it needed a photo.",
+    ],
+  },
+  embriagado: {
+    pt: [
+      "Eu tô ótimo, moço. Foi só uma cervejinha no almoço.",
+      "Deixa eu votar rapidinho que eu já saio, tá?",
+      "Não precisa disso tudo. Eu sei votar de olho fechado.",
+    ],
+    en: [
+      "I'm doing great, pal. It was just one beer at lunch.",
+      "Let me vote real quick and I'm out of here, all right?",
+      "No need for all that. I could vote with my eyes closed.",
+    ],
+  },
+  ano_errado: {
+    pt: [
+      "Nasci em... deixa eu ver. Sempre me atrapalho com isso.",
+      "Essa data aí nunca bateu com a minha. Vive dando problema.",
+      "Ano de nascimento? Ih, eu sempre erro na hora de falar.",
+    ],
+    en: [
+      "I was born in... let me think. I always get tangled up with that.",
+      "That date there has never matched mine. It's always trouble.",
+      "Year of birth? Oh, I always get it wrong when I say it out loud.",
+    ],
+  },
+  fora_caderno: {
+    pt: [
+      "Procurei meu nome no cartaz lá fora e não achei.",
+      "Mudei de endereço faz pouco tempo. Será que é por isso?",
+      "Eu votei aqui na outra eleição, tenho certeza.",
+    ],
+    en: [
+      "I looked for my name on the notice outside and couldn't find it.",
+      "I changed address not long ago. Could that be why?",
+      "I voted here in the last election, I'm certain.",
+    ],
+  },
+  justifica: {
+    pt: [
+      "Eu não voto aqui, estou de passagem. Dá para justificar?",
+      "Vim trabalhar nessa cidade e não deu para voltar.",
+      "Meu título é de outro município. Vim resolver isso aqui.",
+    ],
+    en: [
+      "I don't vote here, I'm just passing through. Can I file the absence?",
+      "I came to work in this town and couldn't get back in time.",
+      "My registration is in another town. I came to settle it here.",
+    ],
+  },
+  duvida_juiz: {
+    pt: [
+      "Sou eu, claro que sou eu. Não precisa ficar olhando tanto.",
+      "Essa foto está ruim, mas todo mundo me reconhece.",
+      "Perguntar o quê? Eu não decorei esses dados de cabeça.",
+    ],
+    en: [
+      "It's me, of course it's me. No need to stare so hard.",
+      "That photo is bad, but everyone recognizes me.",
+      "Ask me what? I haven't got all that memorized.",
+    ],
+  },
+  desistiu: {
+    pt: [
+      "Se demorar muito eu vou ter que voltar depois, viu?",
+      "Estou com pouco tempo, mas vamos lá.",
+      "Deixa eu ver se dá tempo. Estou esperando uma ligação.",
+    ],
+    en: [
+      "If this takes long I'll have to come back later, all right?",
+      "I'm short on time, but let's get to it.",
+      "Let me see if there's time. I'm waiting on a call.",
+    ],
+  },
 };
 
 const WHY = {
-  comum: "Documento e cadastro coincidem e a biometria confirmou: o atendimento era só seguir a ordem.",
-  digital: "A versão digital oficial é aceita pelas regras do protótipo, e a biometria confirmou a identidade.",
-  prioridade: "Apesar da foto antiga, os dados e a biometria confirmaram a identidade.",
-  retry: "A primeira leitura falhou, mas a segunda confirmou. O manual pede exatamente isso antes de habilitar.",
-  biografica:
-    "Esgotadas as quatro tentativas, o ano de nascimento conferiu com o cadastro. Nesse caminho a pessoa assina o caderno antes de votar.",
-  duvida_ok: "As perguntas confirmaram a identidade. Com a dúvida desfeita, a habilitação era o caminho.",
-  ja_votou: "O terminal já registrava comparecimento. O caso precisava ser encaminhado, não habilitado de novo.",
-  outra_secao: (p) => `O cadastro indica a seção ${p.reg.section}. A mesa ${SECTION} não deve habilitar essa pessoa.`,
-  impedido: "A situação no terminal impedia a habilitação. Era necessário encaminhar para orientação.",
-  sem_foto: "Neste protótipo, a identificação exige documento oficial com foto. Certidão não serve.",
-  embriagado:
-    "Sem condições de votar, a saída era conduzir com educação para fora e pedir que voltasse mais tarde — não habilitar.",
-  ano_errado:
-    "Nem a digital nem o ano de nascimento habilitaram. A pessoa não vota: procura o cartório e pode voltar até as 17h.",
-  fora_caderno:
-    "Sem registro na seção e com o nome na listagem de impedidos, restava encaminhar — depois de consultar a listagem.",
-  justifica: (p) => `O título é de ${p.reg.city}. Aqui a pessoa não vota: justifica a ausência.`,
-  duvida_juiz:
-    "As perguntas não desfizeram a dúvida. A mesa não decide identidade sozinha: chama o juiz e a fila continua andando.",
-  desistiu:
-    "A pessoa foi habilitada, entrou na cabina e saiu sem votar. Esse voto precisa ser suspenso para a urna liberar a próxima pessoa.",
+  comum: {
+    pt: "Documento e cadastro coincidem e a biometria confirmou: o atendimento era só seguir a ordem.",
+    en: "Document and record match, and the fingerprint confirmed it: this one was just following the order.",
+  },
+  digital: {
+    pt: "A versão digital oficial é aceita pelas regras do protótipo, e a biometria confirmou a identidade.",
+    en: "The official digital version is accepted by this prototype's rules, and the fingerprint confirmed the identity.",
+  },
+  prioridade: {
+    pt: "Apesar da foto antiga, os dados e a biometria confirmaram a identidade.",
+    en: "The photo was old, but the record and the fingerprint confirmed the identity.",
+  },
+  retry: {
+    pt: "A primeira leitura falhou, mas a segunda confirmou. O manual pede exatamente isso antes de habilitar.",
+    en: "The first read failed and the second confirmed. That is exactly what the handbook asks before clearing someone.",
+  },
+  biografica: {
+    pt: "Esgotadas as quatro tentativas, o ano de nascimento conferiu com o cadastro. Nesse caminho a pessoa assina o caderno antes de votar.",
+    en: "With the four attempts spent, the year of birth matched the record. On that path the voter signs the register before voting.",
+  },
+  duvida_ok: {
+    pt: "As perguntas confirmaram a identidade. Com a dúvida desfeita, a habilitação era o caminho.",
+    en: "The questions confirmed the identity. With the doubt cleared, letting the voter through was the way.",
+  },
+  ja_votou: {
+    pt: "O terminal já registrava comparecimento. O caso precisava ser encaminhado, não habilitado de novo.",
+    en: "The terminal already showed attendance. The case had to be sent on, not cleared a second time.",
+  },
+  outra_secao: (p) => ({
+    pt: `O cadastro indica a seção ${p.reg.section}. A mesa ${SECTION} não deve habilitar essa pessoa.`,
+    en: `The record points to section ${p.reg.section}. Table ${SECTION} must not clear this voter.`,
+  }),
+  impedido: {
+    pt: "A situação no terminal impedia a habilitação. Era necessário encaminhar para orientação.",
+    en: "The status on the terminal barred the vote. The voter had to be sent on for guidance.",
+  },
+  sem_foto: {
+    pt: "Neste protótipo, a identificação exige documento oficial com foto. Certidão não serve.",
+    en: "In this prototype, identification requires an official document with a photo. A birth certificate does not count.",
+  },
+  embriagado: {
+    pt: "Sem condições de votar, a saída era conduzir com educação para fora e pedir que voltasse mais tarde — não habilitar.",
+    en: "In no state to vote, the way out was to walk the person politely to the door and ask them to come back later — not to clear them.",
+  },
+  ano_errado: {
+    pt: "Nem a digital nem o ano de nascimento habilitaram. A pessoa não vota: procura o cartório e pode voltar até as 17h.",
+    en: "Neither the fingerprint nor the year of birth cleared the voter. No vote here: the electoral office first, and they can come back until 5 p.m.",
+  },
+  fora_caderno: {
+    pt: "Sem registro na seção e com o nome na listagem de impedidos, restava encaminhar — depois de consultar a listagem.",
+    en: "Not registered in this section and listed among the barred voters, sending the person on was all that was left — after checking the sheet.",
+  },
+  justifica: (p) => ({
+    pt: `O título é de ${p.reg.city}. Aqui a pessoa não vota: justifica a ausência.`,
+    en: `The registration belongs to ${p.reg.city}. No vote here: the absence gets filed instead.`,
+  }),
+  duvida_juiz: {
+    pt: "As perguntas não desfizeram a dúvida. A mesa não decide identidade sozinha: chama o juiz e a fila continua andando.",
+    en: "The questions did not settle the doubt. The table does not decide identity on its own: call the judge and keep the queue moving.",
+  },
+  desistiu: {
+    pt: "A pessoa foi habilitada, entrou na cabina e saiu sem votar. Esse voto precisa ser suspenso para a urna liberar a próxima pessoa.",
+    en: "The voter was cleared, stepped into the booth and left without voting. That vote has to be suspended so the machine frees up for the next person.",
+  },
 };
 
 /* ------------------------------------------------------------ documentos --- */
@@ -260,11 +436,13 @@ const WHY = {
    por isso que a preferência aparece em qualquer arquétipo — na porta da seção
    ela não tem nada a ver com o documento que a pessoa traz. */
 const PREFERENCE = [
-  "com criança de colo",
-  "pessoa com deficiência",
-  "mobilidade reduzida",
-  "doou sangue há menos de 120 dias",
+  { pt: "com criança de colo", en: "carrying a baby" },
+  { pt: "pessoa com deficiência", en: "person with a disability" },
+  { pt: "mobilidade reduzida", en: "reduced mobility" },
+  { pt: "doou sangue há menos de 120 dias", en: "blood donor in the last 120 days" },
 ];
+const GESTANTE = { pt: "gestante", en: "pregnant" };
+const ANOS = (idade) => ({ pt: `${idade} anos`, en: `${idade} years old` });
 
 const OTHER_SECTIONS = ["088", "119", "126", "128", "131", "203"];
 const OTHER_CITIES = ["SANTA RITA", "PORTO NOVO", "VILA CAMPINAS", "SÃO BENTO", "ARARA VERDE"];
@@ -274,18 +452,25 @@ function documents(d) {
   const cnh = () => `${d.int(10000000, 99999999)}${d.int(0, 9)}-${d.int(0, 9)}`;
   const cpf = () => `${d.int(100, 999)}.${d.int(100, 999)}.${d.int(100, 999)}-${d.int(0, 9)}`;
 
+  /* `art` e `photo` são chaves internas — o desenho do documento e o estado da
+     foto. O que a pessoa lê na mesa é `type` e `note`, nos dois idiomas. */
+  const COM_FOTO = { pt: "Documento com foto", en: "Photo ID" };
   return {
-    identidade: { art: "identidade", type: "Carteira de identidade", note: "Documento com foto", photo: "FOTO COMPATÍVEL", number: rg },
-    antiga: { art: "identidade", type: "Carteira de identidade", note: "Documento antigo com foto", photo: "FOTO ANTIGA", number: rg },
-    habilitacao: { art: "habilitacao", type: "Carteira de motorista", note: "Documento com foto", photo: "FOTO COMPATÍVEL", number: cnh },
-    profissional: { art: "profissional", type: "Carteira profissional", note: "Documento com foto", photo: "FOTO COMPATÍVEL", number: cpf },
-    digital: { art: "digital", type: "Identidade digital oficial", note: "Aplicativo oficial", photo: "TELA OFICIAL", number: rg },
+    identidade: { art: "identidade", type: { pt: "Carteira de identidade", en: "Identity card" }, note: COM_FOTO, photo: "FOTO COMPATÍVEL", number: rg },
+    antiga: { art: "identidade", type: { pt: "Carteira de identidade", en: "Identity card" }, note: { pt: "Documento antigo com foto", en: "Old photo ID" }, photo: "FOTO ANTIGA", number: rg },
+    habilitacao: { art: "habilitacao", type: { pt: "Carteira de motorista", en: "Driver's license" }, note: COM_FOTO, photo: "FOTO COMPATÍVEL", number: cnh },
+    profissional: { art: "profissional", type: { pt: "Carteira profissional", en: "Professional card" }, note: COM_FOTO, photo: "FOTO COMPATÍVEL", number: cpf },
+    digital: { art: "digital", type: { pt: "Identidade digital oficial", en: "Official digital ID" }, note: { pt: "Aplicativo oficial", en: "Official app" }, photo: "TELA OFICIAL", number: rg },
     certidao: {
       art: "certidao",
-      type: "Certidão de nascimento",
-      note: "Documento sem foto",
+      type: { pt: "Certidão de nascimento", en: "Birth certificate" },
+      note: { pt: "Documento sem foto", en: "Document without a photo" },
       photo: "SEM FOTO",
-      number: () => `${d.int(100000, 999999)} · Livro ${d.pick(["A", "B", "C"])}`,
+      number: () => {
+        const numero = d.int(100000, 999999);
+        const livro = d.pick(["A", "B", "C"]);
+        return { pt: `${numero} · Livro ${livro}`, en: `${numero} · Book ${livro}` };
+      },
     },
   };
 }
@@ -402,6 +587,16 @@ function plan(d, count) {
   return order;
 }
 
+/* Sorteia uma posição e devolve a frase nos dois idiomas. As listas `pt` e
+   `en` de um arquétipo têm o mesmo tamanho, então um sorteio só serve para as
+   duas — e é por isso que o mesmo turno diz a mesma coisa nas duas línguas.
+   O sorteio é o mesmo de `d.pick`, então trocar de idioma não mexe na
+   semente: `?turno=xyz` continua devolvendo o dia idêntico. */
+const pickPair = (d, pair) => {
+  const escolha = d.int(0, pair.pt.length - 1);
+  return { pt: pair.pt[escolha], en: pair.en[escolha] };
+};
+
 function makePerson(kind, i, count, d, used) {
   const K = KINDS[kind];
 
@@ -480,12 +675,12 @@ function makePerson(kind, i, count, d, used) {
     sex,
     priority,
     // Gestante só entra na lista de quem pode ser gestante.
-    preference: priority ? (old60 ? `${YEAR - year} anos` : d.pick(sex === "f" ? [...PREFERENCE, "gestante"] : PREFERENCE)) : null,
+    preference: priority ? (old60 ? ANOS(YEAR - year) : d.pick(sex === "f" ? [...PREFERENCE, GESTANTE] : PREFERENCE)) : null,
     time: `${pad(Math.floor(minute / 60))}:${pad(minute % 60)}`,
     queue,
     name: short,
     tag: d.pick(TAGS[kind]),
-    line: d.pick(LINES[kind]),
+    line: pickPair(d, LINES[kind]),
     doc,
     reg,
     bio: K.bio,

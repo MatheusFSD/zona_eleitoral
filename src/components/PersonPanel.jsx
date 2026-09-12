@@ -3,6 +3,7 @@ import Talk from "./Talk.jsx";
 import Tutor from "./Tutor.jsx";
 import { Fan, Window } from "./Classroom.jsx";
 import { COORDENADORA, realce } from "../data/tutorial.js";
+import { TXT, t } from "../i18n.js";
 
 /* A coluna da esquerda é um pedaço da sala: parede creme, barra azul, janela
    basculante e ventilador. A pessoa entra andando por ali como um vulto preto,
@@ -13,10 +14,10 @@ export default function PersonPanel({ person, running, calling, c, onAsk, cabina
     <aside className="panel person" ref={areaRef}>
       {/* A sala nunca apaga: é dela que sai a explicação. Só acende quando o
           assunto é quem está na frente da mesa. */}
-      <div className={`room${realce(foco, "pessoa")}`}>
+      <div className={`room${!running && !tutor && !calling ? " room-closed" : ""}${realce(foco, "pessoa")}`}>
         <Window />
         <Fan />
-        <div className="tape-note">Sala 03 · mesa receptora</div>
+        <div className="tape-note">{t(TXT.salaEtiqueta)}</div>
         <div className="portrait">
           {/* a `key` remonta o bloco a cada pessoa, para a chegada tocar de novo */}
           {running && person ? (
@@ -40,22 +41,22 @@ export default function PersonPanel({ person, running, calling, c, onAsk, cabina
       <div className="person-card" key={person ? person.id : tutor ? "coordenadora" : "fechada"}>
         {/* Sem nome nem descrição: o nome está no documento e no terminal, e é
             lá que a mesa tem de ler. */}
-        {!(running && person) && !tutor && <h2>{calling ? "Ninguém na mesa" : "Portas fechadas"}</h2>}
+        {!(running && person) && !tutor && <h2>{t(calling ? TXT.ninguemNaMesa : TXT.portasFechadas)}</h2>}
         {/* Ela se apresenta pela etiqueta; o crachá faz o papel do nome. */}
         {tutor && (
           <p className="tutor-tag">
-            {COORDENADORA.name} · {COORDENADORA.role}
+            {COORDENADORA.name} · {t(COORDENADORA.role)}
           </p>
         )}
         {/* Quem tem preferência traz o motivo escrito na etiqueta. */}
-        {running && person?.priority && <p className="preferencia-tag">Preferência · {person.preference}</p>}
+        {running && person?.priority && <p className="preferencia-tag">{t(TXT.preferenciaTag, { motivo: t(person.preference) })}</p>}
         {running && person ? (
           <Talk person={person} c={c} onAsk={onAsk} />
         ) : tutor ? (
           <Tutor {...tutor} />
         ) : (
           <p className="speech">
-            {calling ? "Chame a próxima pessoa do corredor." : "Organize a mesa e prepare-se para a primeira pessoa."}
+            {t(calling ? TXT.chameProxima : TXT.naoAbriu)}
           </p>
         )}
       </div>
@@ -65,7 +66,7 @@ export default function PersonPanel({ person, running, calling, c, onAsk, cabina
 
 function ClosedDoor() {
   return (
-    <svg viewBox="0 0 160 200" preserveAspectRatio="xMidYMax meet" role="img" aria-label="Porta da seção ainda fechada">
+    <svg viewBox="0 0 160 200" preserveAspectRatio="xMidYMax meet" role="img" aria-label={t(TXT.portaFechada)}>
       <rect x="26" y="10" width="108" height="190" rx="3" fill="#4b7ba4" stroke="#2f5878" strokeWidth="4" />
       <g fill="none" stroke="#31597a" strokeWidth="3">
         <rect x="40" y="26" width="80" height="52" rx="2" />
@@ -84,7 +85,7 @@ function ClosedDoor() {
         fontSize="13"
         fontWeight="700"
       >
-        FECHADA
+        {t(TXT.fechada)}
       </text>
     </svg>
   );

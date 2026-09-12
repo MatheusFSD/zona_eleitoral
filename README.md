@@ -1,7 +1,52 @@
-# Seção 127
+# Zona Eleitoral
 
 Protótipo de jogo sobre o trabalho de mesário: conferir documento, cadastro e
 biometria de doze pessoas ao longo de um turno comprimido.
+
+## Menu e salvamento
+
+A logo `logo-itacoa.svg` aparece por três segundos, seguida do aviso de que o jogo
+não é um treinamento eleitoral por mais três segundos. Cada tela tem uma barra
+de duração e avança ao clicar em qualquer lugar, sem botão visível. Depois vem
+o menu de Zona Eleitoral. Novo jogo abre o prólogo; Carregar jogo recupera a partida
+salva automaticamente em `localStorage` (`secao-127.save.v1`). Idioma fica desabilitado.
+
+O salvamento inclui o turno, atendimento em andamento, fila, relógio, votos,
+erros, assinaturas, conversa, tutorial e posição dos objetos. Uma leitura
+biométrica parcial recomeça; o voto na cabina retoma a animação sem duplicar
+a contagem. `Esc` ou o botão Ⅱ no cabeçalho abrem o menu durante a partida.
+Novo jogo substitui o salvamento. Ao concluir qualquer final, a partida salva é
+removida e Menu principal volta à tela de título.
+
+Não há faixa de passo nem texto de protótipo na barra de ações da mesa.
+
+## Irritação e encerramento
+
+O retrato da Neusa ocupa o antigo contador de ocorrências no cabeçalho.
+A boca e as sobrancelhas mudam a cada erro, e o fundo passa do verde ao vermelho.
+O retrato tem sombra, sem medidor ou legenda. O relógio usa dígitos de sete
+segmentos e todos os elementos do cabeçalho acompanham a altura da fila.
+No quinto erro (`src/day.js`), ela dispensa o jogador e as horas ficam pendentes.
+
+Tentativas de biometria sem reconhecimento e ações recusadas antes da hora
+continuam sem penalidade. Uma ocorrência de fila aparece no retorno daquele
+atendimento, mas não é contada duas vezes. Consultar o manual também é livre.
+
+Depois do último atendimento, `Closing.jsx` mostra uma sequência automática de
+8,5 segundos: o papel sai da impressora, a urna entra na caixa e a fita fecha a
+embalagem. Com movimento reduzido, são três quadros em 2,1 segundos. É uma
+representação simbólica do fim do dia, reaproveitando a urna da abertura.
+O boletim de urna usa a mesma identificação e o mesmo formato da zerésima,
+com o total de votos concluídos. Encaminhamentos, justificativas e desistências
+não somam votos. O jogo não registra escolhas de candidatos, brancos ou nulos.
+Na abertura, a urna fica diretamente sobre uma mesa na sala, sem painel de modal.
+
+Os dois desfechos usam `Cutscene`, o mesmo componente do prólogo: imagem, um
+parágrafo curto e Menu principal. As artes estão em `public/images/story/saida.png`
+e `dispensa.png`; os prompts estão em `finais-prompts.md` na mesma pasta.
+
+`npm test` cobre fila, biometria, limite de erros, expressões do retrato, sequência
+automática e reinício. O atalho ↠ abre a animação apenas no desenvolvimento.
 
 ## Rodar
 
@@ -73,12 +118,76 @@ o resto continua igual.
 | [src/data/people.js](src/data/people.js) | O manual da mesa e as saídas de exceção |
 | [src/data/talk.js](src/data/talk.js) | As perguntas da mesa e as respostas de cada arquétipo |
 | [src/data/tutorial.js](src/data/tutorial.js) | O roteiro da coordenadora, passo a passo |
+| [src/i18n.js](src/i18n.js) | Os dois idiomas: detecção, troca e o texto da interface |
 | [src/random.js](src/random.js) | Semente de texto e sorteio determinístico |
 | [src/components/Desk.jsx](src/components/Desk.jsx) | A superfície da mesa e onde cada objeto começa o dia |
 | [src/components/desk/](src/components/desk/) | Documento, terminal, caderno, leitor, comprovante, livro e folha |
 | [src/components/Opening.jsx](src/components/Opening.jsx) | A urna zerada e a zerésima saindo da impressora |
 | [src/styles.css](src/styles.css) | Folha única de estilo |
 | [legacy/index.html](legacy/index.html) | Versão anterior, em HTML puro |
+
+## Dois idiomas
+
+O jogo abre no idioma do navegador: qualquer coisa que comece com `pt` abre em
+português, todo o resto abre em inglês. No menu principal, a terceira opção
+troca — e a escolha fica guardada no navegador, valendo por cima da detecção na
+próxima visita. Trocar redesenha a tela inteira na hora, no meio da partida
+inclusive.
+
+**Nomes de pessoas e de lugares não se traduzem.** Neusa Prado continua Neusa
+Prado, a Escola Municipal Horizonte mantém o nome, Monte Alegre e as outras
+cidades ficam como estão, e o jogo continua se chamando Zona Eleitoral. O que
+muda é a língua: rótulo, fala, documento, manual e aviso.
+
+### Como o texto é escrito
+
+Não há catálogo de chaves para manter em sincronia. Um texto traduzível é um
+par, escrito no lugar onde ele é usado:
+
+```js
+t({ pt: "Continuar", en: "Continue" })
+```
+
+O par também guarda listas — as falas de uma cena, os itens de uma página do
+manual:
+
+```js
+fala: {
+  pt: ["Olha lá o corredor.", "Quem tem preferência passa na frente."],
+  en: ["Look at the hallway.", "Anyone with priority goes ahead."],
+}
+```
+
+O motor é [src/i18n.js](src/i18n.js), com três coisas dentro: `t()`, que resolve
+um par no idioma de agora (e preenche buracos escritos entre chaves); `TXT`, o
+punhado de textos que se repete pela interface; e `useIdioma()`, chamado uma
+única vez na raiz — trocar o idioma redesenha a árvore, e `t()` é uma função
+comum em todo o resto do código.
+
+O texto do jogo mora junto dos dados, com as duas línguas lado a lado:
+[data/shift.js](src/data/shift.js) tem as falas de chegada e a explicação de
+cada caso, [data/talk.js](src/data/talk.js) as perguntas e respostas,
+[data/tutorial.js](src/data/tutorial.js) o roteiro da coordenadora e
+[data/people.js](src/data/people.js) o manual e as quatro saídas.
+
+### O que não é texto
+
+Três coisas atravessam sem tradução, de propósito:
+
+| O que | Por quê |
+| --- | --- |
+| `id`, `kind`, `art`, `photo`, `foco` | são nomes internos, não aparecem na tela |
+| as etiquetas de `TAGS` em shift.js | não vão à tela hoje: o painel da pessoa não tem descrição |
+| os nomes do caderno e da listagem | são nomes de gente |
+
+O sorteio também não muda de idioma: as listas `pt` e `en` de um arquétipo têm o
+mesmo tamanho, e o sorteio escolhe a **posição**, não a frase. Por isso
+`?turno=xyz` devolve o mesmo dia nas duas línguas, pessoa por pessoa.
+
+O que fica registrado — a conversa, o veredito do atendimento, a ocorrência de
+fila — é guardado como texto já resolvido, e não como par: é registro do que foi
+dito naquele momento. Trocar de idioma no meio do dia muda a interface e o que
+vier depois, sem reescrever o que já passou.
 
 ## Uma tela só
 
@@ -524,10 +633,9 @@ das teclas é mexer num lugar só.
 ## Atalho de desenvolvimento
 
 No cabeçalho, ao lado da contagem de casos, há um **pular ao fim** tracejado:
-encerra o dia na hora com tudo resolvido — doze atendidos, doze corretos, nenhuma
-ocorrência — para poder olhar o boletim de encerramento sem jogar o turno
-inteiro. É ferramenta de obra, e está desenhado como rascunho para não se
-confundir com os botões do jogo.
+encerra o dia na hora para revisar a animação sem jogar o turno inteiro.
+O boletim preserva somente os votos já concluídos; o atalho não inventa votos.
+Ele só aparece no servidor de desenvolvimento.
 
 ## Atalhos
 

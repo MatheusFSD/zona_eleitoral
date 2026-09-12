@@ -1,3 +1,5 @@
+import { t } from "./i18n.js";
+
 /* O atendimento, passo a passo.
 
    Um caso é uma pequena máquina de estados: terminal, caderno, biometria,
@@ -9,14 +11,35 @@
    ações da mesa fecha o atendimento. */
 
 export const STEP = {
-  terminal: "Digite no terminal a identificação do documento.",
-  caderno: "Ache na folha o nome que está no terminal.",
-  biometria: "Encaixe o indicador no leitor e segure a mão por 3 segundos.",
-  ano: "Pergunte o ano de nascimento e digite no terminal.",
-  assinatura: "A pessoa assina o caderno.",
-  cabina: "A pessoa deixou as coisas na carteira e foi votar.",
-  entrega: "Devolva os pertences, o documento e o comprovante — arraste para a pessoa.",
-  decisao: "Este caso não se resolve no trilho: escolha uma saída.",
+  terminal: {
+    pt: "Digite no terminal a identificação do documento.",
+    en: "Type the document number into the terminal.",
+  },
+  caderno: {
+    pt: "Ache na folha o nome que está no terminal.",
+    en: "Find the name from the terminal on the sheet.",
+  },
+  biometria: {
+    pt: "Encaixe o indicador no leitor e segure a mão por 3 segundos.",
+    en: "Set the index finger on the reader and hold the hand for 3 seconds.",
+  },
+  ano: {
+    pt: "Pergunte o ano de nascimento e digite no terminal.",
+    en: "Ask for the year of birth and type it into the terminal.",
+  },
+  assinatura: { pt: "A pessoa assina o caderno.", en: "The voter signs the register." },
+  cabina: {
+    pt: "A pessoa deixou as coisas na carteira e foi votar.",
+    en: "The voter left their things on the desk and went to vote.",
+  },
+  entrega: {
+    pt: "Devolva os pertences, o documento e o comprovante — arraste para a pessoa.",
+    en: "Hand back belongings, document and receipt — drag them to the voter.",
+  },
+  decisao: {
+    pt: "Este caso não se resolve no trilho: escolha uma saída.",
+    en: "This case will not resolve on the rails: pick an action.",
+  },
 };
 
 export const newCase = () => ({
@@ -54,14 +77,24 @@ const OWNER = {
 };
 
 const REFUSAL = {
-  terminal: "O terminal vem primeiro: sem registro na tela, não dá para seguir.",
-  caderno: "Antes, ache o nome na folha do caderno.",
-  biometria: "Falta a digital no leitor.",
-  ano: "O terminal está esperando o ano de nascimento.",
-  assinatura: "Falta a assinatura da pessoa no caderno.",
-  cabina: "A pessoa está na cabina. Espere.",
-  entrega: "Falta devolver o que é da pessoa.",
-  decisao: "Este caso já saiu do trilho: use uma das ações da mesa.",
+  terminal: {
+    pt: "O terminal vem primeiro: sem registro na tela, não dá para seguir.",
+    en: "The terminal comes first: with no record on screen, there is no going on.",
+  },
+  caderno: { pt: "Antes, ache o nome na folha do caderno.", en: "First, find the name on the register sheet." },
+  biometria: { pt: "Falta a digital no leitor.", en: "The fingerprint on the reader is still missing." },
+  ano: { pt: "O terminal está esperando o ano de nascimento.", en: "The terminal is waiting for the year of birth." },
+  assinatura: {
+    pt: "Falta a assinatura da pessoa no caderno.",
+    en: "The voter's signature is still missing from the register.",
+  },
+  cabina: { pt: "A pessoa está na cabina. Espere.", en: "The voter is in the booth. Wait." },
+  entrega: { pt: "Falta devolver o que é da pessoa.", en: "There is still something of theirs to hand back." },
+  decisao: {
+    pt: "Este caso já saiu do trilho: use uma das ações da mesa.",
+    en: "This case is already off the rails: use one of the table actions.",
+  },
+  fallback: { pt: "Ainda não é a hora disso.", en: "Not the moment for that yet." },
 };
 
 export function allowed(step, piece) {
@@ -69,31 +102,42 @@ export function allowed(step, piece) {
 }
 
 export function refusal(step) {
-  return REFUSAL[step] ?? "Ainda não é a hora disso.";
+  return t(REFUSAL[step] ?? REFUSAL.fallback);
 }
 
 /* ------------------------------------------------------------- o veredito -- */
 
 const TITLE = {
-  fluxo: "Pessoa habilitada e comprovante entregue",
-  encaminhar: "Encaminhamento correto",
-  justificar: "Justificativa registrada",
-  juiz: "Juiz chamado à seção",
-  suspender: "Votação suspensa",
+  fluxo: { pt: "Pessoa habilitada e comprovante entregue", en: "Voter cleared and receipt handed over" },
+  encaminhar: { pt: "Encaminhamento correto", en: "Sent on, correctly" },
+  justificar: { pt: "Justificativa registrada", en: "Absence filed" },
+  juiz: { pt: "Juiz chamado à seção", en: "Judge called to the section" },
+  suspender: { pt: "Votação suspensa", en: "Vote suspended" },
+  erro: { pt: "Uma ocorrência foi aberta", en: "An incident was opened" },
 };
 
 const STAMP = {
-  fluxo: "HABILITADO",
-  encaminhar: "ENCAMINHADO",
-  justificar: "JUSTIFICADO",
-  juiz: "AGUARDA O JUIZ",
-  suspender: "SUSPENSO",
+  fluxo: { pt: "HABILITADO", en: "CLEARED" },
+  encaminhar: { pt: "ENCAMINHADO", en: "SENT ON" },
+  justificar: { pt: "JUSTIFICADO", en: "ABSENCE FILED" },
+  juiz: { pt: "AGUARDA O JUIZ", en: "AWAITING THE JUDGE" },
+  suspender: { pt: "SUSPENSO", en: "SUSPENDED" },
+  erro: { pt: "OCORRÊNCIA", en: "INCIDENT" },
 };
 
 const MISSED = {
-  terminal: "Você decidiu sem carregar o registro no terminal.",
-  ask: "Faltou perguntar os dados à pessoa antes de decidir.",
-  list: "Faltou consultar a listagem de impedidos: o nome estava lá.",
+  terminal: {
+    pt: "Você decidiu sem carregar o registro no terminal.",
+    en: "You decided without loading the record on the terminal.",
+  },
+  ask: {
+    pt: "Faltou perguntar os dados à pessoa antes de decidir.",
+    en: "You skipped asking the voter for their details before deciding.",
+  },
+  list: {
+    pt: "Faltou consultar a listagem de impedidos: o nome estava lá.",
+    en: "You skipped the barred voters sheet: the name was on it.",
+  },
 };
 
 /* O tempo que cada saída custa à mesa, em minutos de fila. */
@@ -110,13 +154,15 @@ export function judge(person, action, c) {
   return verdict(action === person.resolve, action, person, "");
 }
 
+/* O veredito sai em texto, no idioma de agora: ele é registro do atendimento —
+   vai para a tela de retorno e para o jogo salvo. */
 function verdict(right, action, person, note) {
   return {
     right,
     action,
-    title: right ? TITLE[action] : "Uma ocorrência foi aberta",
-    stamp: right ? STAMP[action] : "OCORRÊNCIA",
-    text: note || person.why,
+    title: t(right ? TITLE[action] : TITLE.erro),
+    stamp: t(right ? STAMP[action] : STAMP.erro),
+    text: t(note || person.why),
     minutes: COST[action] ?? 4,
   };
 }

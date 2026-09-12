@@ -2,8 +2,9 @@ import { faceOf } from "../face.js";
 import { useId, useState } from "react";
 import { createPortal } from "react-dom";
 import { luz } from "../data/tutorial.js";
-
-const pad = (n, len) => String(n).padStart(len, "0");
+import { TXT, t } from "../i18n.js";
+import Neusa from "./Neusa.jsx";
+import DigitalClock from "./DigitalClock.jsx";
 
 /* O cabeçalho é a placa da sala: relógio, corredor, contagem do dia.
 
@@ -13,16 +14,6 @@ const pad = (n, len) => String(n).padStart(len, "0");
    frente; quem chega entra pelo fim, lá no fundo — por isso as do fim são
    menores. Quem tem preferência aparece em outra cor e pode ser chamada na
    frente das demais. */
-
-function Metric({ label, value, bad, children }) {
-  return (
-    <div className="metric">
-      <span className="label">{label}</span>
-      <strong className={bad ? "value bad" : "value"}>{value}</strong>
-      {children}
-    </div>
-  );
-}
 
 /* Pequenos personagens com as mesmas cores e características dos retratos. */
 function PessoaFila({ person }) {
@@ -83,6 +74,7 @@ export default function TopBar({
   total,
   marks,
   onSkip,
+  onMenu,
   foco,
 }) {
   const anonimos = Math.min(5, Math.max(0, crowd));
@@ -98,18 +90,19 @@ export default function TopBar({
     /* No tutorial o cabeçalho inteiro apaga, menos quando o assunto é a fila. */
     <header className={`top${luz(foco, "fila")}`}>
       <div className="section-plate">
-        <div className="section-number"><span>SEÇÃO</span><h1>127</h1></div>
-        <div className="section-location"><strong>E. M. HORIZONTE</strong><span>ZONA 041 · SALA 03</span><small>MESA RECEPTORA</small></div>
+        <div className="section-number"><span>{t(TXT.secao)}</span><h1>127</h1></div>
+        {/* O nome da escola não se traduz. */}
+        <div className="section-location"><strong>E. M. HORIZONTE</strong><span>{t(TXT.zonaSala)}</span><small>{t(TXT.mesaReceptora)}</small></div>
       </div>
 
-      <Metric label="Horário" value={time} />
+      <DigitalClock time={time} />
 
       <div className="metric fila-metric">
-        <div className="corredor-cena" role="group" aria-label={`Fila: ${waiting.length} pessoas no corredor`}>
+        <div className="corredor-cena" role="group" aria-label={t(TXT.filaCorredor, { n: waiting.length })}>
           <div className="parede" aria-hidden="true" />
           <div className="piso" aria-hidden="true" />
           <div className="corredor-janelas" aria-hidden="true"><i /><i /><i /></div>
-          <div className="corredor-aviso" aria-hidden="true">SILÊNCIO<br />VOTAÇÃO</div>
+          <div className="corredor-aviso" aria-hidden="true">{t(TXT.silencio)}<br />{t(TXT.votacao)}</div>
           <Porta />
 
           <ul className="corredor" onScroll={() => setHover(null)}>
@@ -130,7 +123,7 @@ export default function TopBar({
                     onClick={() => { setHover(null); onCall(i); }}
                     disabled={!calling}
                     aria-describedby={hover?.person.id === person.id ? tipId : undefined}
-                    aria-label={`Chamar ${person.name} · ${person.priority ? person.preference : "sem prioridade"}`}
+                    aria-label={t(TXT.chamarPessoa, { nome: person.name, motivo: person.priority ? t(person.preference) : t(TXT.semPrioridadeMin) })}
                   >
                     <PessoaFila person={person} />
                   </button>
@@ -150,16 +143,16 @@ export default function TopBar({
         </div>
       </div>
 
-      <Metric label="Atendidos" value={pad(served, 3)} />
-      <Metric label="Ocorrências" value={pad(errors, 2)} bad={errors > 0} />
+      <Neusa errors={errors} />
 
       <div className="progress">
         <span className="label">
-          Casos {Math.min(served + 1, total)}/{total}
+          {t(TXT.casos, { n: Math.min(served + 1, total), total })}
+          <button type="button" className="menu-pause" onClick={onMenu} aria-label={t(TXT.menuPrincipal)} title={t(TXT.pausar)}><span aria-hidden="true">Ⅱ</span></button>
           {/* atalho de desenvolvimento: fecha o dia com tudo resolvido */}
-          <button type="button" className="pular" onClick={onSkip} title="Pular ao fim — atalho de desenvolvimento" aria-label="Pular ao fim do dia">
+          {onSkip && <button type="button" className="pular" onClick={onSkip} title={t(TXT.pularAoFimDica)} aria-label={t(TXT.pularAoFim)}>
             ↠
-          </button>
+          </button>}
         </span>
         <div className="dots" aria-hidden="true">
           {Array.from({ length: total }, (_, i) => (
@@ -169,8 +162,8 @@ export default function TopBar({
       </div>
       {hover && createPortal(<div className={`queue-tooltip${hover.person.priority ? " priority" : ""}`} id={tipId} role="tooltip" style={hover.style}>
         <strong>{hover.person.name}</strong>
-        <span>{hover.person.priority ? hover.person.preference : "Sem prioridade"}</span>
-        <small>{hover.person.priority ? "Atendimento prioritário" : "Fila comum · ordem de chegada"}</small>
+        <span>{hover.person.priority ? t(hover.person.preference) : t(TXT.semPrioridade)}</span>
+        <small>{t(hover.person.priority ? TXT.atendimentoPrioritario : TXT.filaComum)}</small>
       </div>, document.body)}
     </header>
   );
